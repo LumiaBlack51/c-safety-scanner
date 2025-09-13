@@ -1,0 +1,4636 @@
+## C Safety Scanner - 预置 BUG 清单与修复建议
+
+本文件列出 tests/ 中预先设置的 BUG 点（带 `// BUG` 标注的行），并汇总“错误类型 + 修改建议”。算法原理与通用建议已归并到 `docs/ALGORITHM.md`。
+
+### tests/graphs/buggy
+
+- graph.c:
+  - `graph_create`: 未初始化使用、野指针
+    - 类型：Uninitialized / Wild pointer
+    - 建议：为 `Graph* g` 分配内存并清零：`g = calloc(1, sizeof(Graph));`
+  - `graph_add_edge`: 未初始化指针 `e` 被写入
+    - 类型：Uninitialized / Wild pointer
+    - 建议：`e = malloc(sizeof(Edge));` 后再赋值
+  - `graph_remove_edge`: `for(;;)` 死循环
+    - 类型：Infinite loop
+    - 建议：增加退出条件或遍历并在未找到时返回
+  - `bfs`: `n` 未初始化即用于分配
+    - 类型：Uninitialized
+    - 建议：`int n = g->n;`
+
+- main.c:
+  - `printf("%d %d %d\n", dist[0], dist[1]);` 少参数
+    - 类型：Format（参数计数）
+    - 建议：补齐第三个参数或减少占位
+
+- bug_0.c ~ bug_49.c：
+  - 头文件拼写错误 `#include <stdiox.h>`
+    - 类型：Header
+    - 建议：改为 `<stdio.h>`（或若为私有头使用双引号）
+  - `printf("%s %d", x, 123);`，`scanf("%d", x);`
+    - 类型：Format（类型/取址）
+    - 建议：将 `%s` 对应 `char*`；`scanf` 对非字符串加 `&x`
+  - `for(;;)` 与 `*p = 1;`
+    - 类型：Infinite loop / Wild pointer
+    - 建议：添加退出条件；为指针分配内存并检查
+
+### tests/graphs/correct
+- 期望无 BUG。若有报警，视为误报并在 `tests/graphs/TESTPLAN.md` 与 `docs/ALGORITHM.md` 中记录并推动算法改进。
+
+
+
+### 识别结果快照 (2025-09-11T11:42:05.048Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_0.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_1.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_1.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_1.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_1.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_10.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_10.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_10.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_10.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_11.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_11.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_11.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_11.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_12.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_12.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_12.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_12.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_13.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_13.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_13.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_13.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_14.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_14.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_14.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_14.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_15.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_15.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_15.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_15.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_16.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_16.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_16.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_16.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_17.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_17.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_17.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_17.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_18.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_18.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_18.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_18.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_19.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_19.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_19.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_19.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_2.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_2.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_2.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_2.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_20.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_20.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_20.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_20.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_21.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_21.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_21.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_21.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_22.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_22.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_22.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_22.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_23.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_23.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_23.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_23.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_24.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_24.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_24.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_24.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_25.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_25.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_25.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_25.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_26.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_26.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_26.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_26.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_27.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_27.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_27.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_27.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_28.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_28.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_28.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_28.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_29.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_29.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_29.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_29.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_3.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_3.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_3.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_3.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_30.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_30.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_30.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_30.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_31.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_31.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_31.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_31.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_32.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_32.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_32.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_32.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_33.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_33.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_33.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_33.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_34.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_34.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_34.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_34.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_35.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_35.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_35.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_35.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_36.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_36.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_36.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_36.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_37.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_37.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_37.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_37.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_38.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_38.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_38.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_38.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_39.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_39.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_39.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_39.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_4.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_4.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_4.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_4.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_40.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_40.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_40.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_40.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_41.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_41.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_41.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_41.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_42.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_42.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_42.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_42.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_43.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_43.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_43.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_43.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_44.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_44.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_44.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_44.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_45.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_45.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_46.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_46.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_46.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_46.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_47.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_47.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_47.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_47.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_48.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_48.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_48.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_48.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_49.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_49.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_49.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_5.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_5.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_5.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_5.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_6.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_6.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_6.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_6.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_7.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_7.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_7.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_7.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_8.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_8.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_8.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_8.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_9.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_9.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_9.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_9.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:15 [Infinite loop] 循环条件变量 e 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:29 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:11 [Format] printf 参数少于格式化占位数 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-11T11:42:05.682Z) - tests\graphs\correct
+- tests\graphs\correct\graph.c:16 [Infinite loop] 循环条件变量 e 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\graph.c:29 [Infinite loop] 循环条件变量 pp 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\graph.c:44 [Infinite loop] 循环条件变量 e 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\main.c:40 [Infinite loop] 循环条件变量 i 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+
+### 识别结果快照 (2025-09-11T11:51:56.565Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_0.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_1.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_1.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_1.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_1.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_10.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_10.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_10.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_10.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_11.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_11.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_11.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_11.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_12.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_12.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_12.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_12.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_13.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_13.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_13.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_13.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_14.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_14.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_14.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_14.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_15.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_15.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_15.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_15.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_16.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_16.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_16.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_16.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_17.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_17.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_17.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_17.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_18.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_18.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_18.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_18.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_19.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_19.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_19.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_19.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_2.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_2.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_2.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_2.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_20.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_20.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_20.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_20.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_21.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_21.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_21.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_21.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_22.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_22.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_22.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_22.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_23.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_23.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_23.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_23.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_24.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_24.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_24.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_24.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_25.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_25.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_25.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_25.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_26.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_26.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_26.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_26.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_27.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_27.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_27.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_27.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_28.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_28.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_28.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_28.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_29.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_29.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_29.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_29.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_3.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_3.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_3.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_3.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_30.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_30.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_30.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_30.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_31.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_31.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_31.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_31.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_32.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_32.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_32.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_32.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_33.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_33.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_33.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_33.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_34.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_34.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_34.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_34.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_35.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_35.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_35.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_35.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_36.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_36.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_36.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_36.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_37.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_37.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_37.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_37.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_38.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_38.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_38.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_38.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_39.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_39.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_39.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_39.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_4.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_4.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_4.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_4.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_40.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_40.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_40.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_40.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_41.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_41.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_41.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_41.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_42.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_42.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_42.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_42.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_43.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_43.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_43.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_43.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_44.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_44.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_44.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_44.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_45.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_45.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_46.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_46.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_46.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_46.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_47.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_47.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_47.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_47.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_48.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_48.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_48.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_48.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_49.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_49.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_49.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_5.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_5.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_5.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_5.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_6.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_6.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_6.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_6.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_7.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_7.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_7.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_7.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_8.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_8.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_8.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_8.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_9.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_9.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_9.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_9.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:15 [Infinite loop] 循环条件变量 e 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:29 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:11 [Format] printf 参数少于格式化占位数 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-11T11:51:57.175Z) - tests\graphs\correct
+- tests\graphs\correct\graph.c:16 [Infinite loop] 循环条件变量 e 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\graph.c:29 [Infinite loop] 循环条件变量 pp 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\graph.c:44 [Infinite loop] 循环条件变量 e 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\main.c:40 [Infinite loop] 循环条件变量 i 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+
+### 识别结果快照 (2025-09-11T11:56:35.885Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_0.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_1.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_1.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_1.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_1.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_10.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_10.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_10.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_10.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_11.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_11.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_11.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_11.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_12.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_12.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_12.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_12.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_13.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_13.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_13.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_13.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_14.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_14.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_14.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_14.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_15.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_15.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_15.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_15.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_16.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_16.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_16.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_16.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_17.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_17.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_17.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_17.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_18.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_18.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_18.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_18.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_19.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_19.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_19.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_19.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_2.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_2.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_2.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_2.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_20.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_20.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_20.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_20.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_21.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_21.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_21.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_21.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_22.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_22.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_22.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_22.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_23.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_23.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_23.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_23.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_24.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_24.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_24.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_24.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_25.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_25.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_25.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_25.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_26.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_26.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_26.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_26.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_27.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_27.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_27.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_27.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_28.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_28.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_28.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_28.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_29.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_29.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_29.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_29.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_3.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_3.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_3.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_3.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_30.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_30.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_30.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_30.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_31.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_31.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_31.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_31.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_32.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_32.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_32.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_32.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_33.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_33.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_33.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_33.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_34.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_34.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_34.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_34.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_35.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_35.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_35.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_35.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_36.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_36.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_36.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_36.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_37.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_37.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_37.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_37.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_38.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_38.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_38.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_38.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_39.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_39.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_39.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_39.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_4.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_4.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_4.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_4.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_40.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_40.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_40.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_40.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_41.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_41.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_41.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_41.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_42.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_42.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_42.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_42.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_43.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_43.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_43.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_43.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_44.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_44.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_44.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_44.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_45.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_45.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_46.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_46.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_46.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_46.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_47.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_47.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_47.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_47.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_48.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_48.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_48.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_48.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_49.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_49.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_49.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_5.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_5.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_5.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_5.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_6.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_6.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_6.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_6.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_7.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_7.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_7.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_7.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_8.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_8.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_8.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_8.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_9.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_9.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_9.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_9.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:15 [Infinite loop] 循环条件变量 e 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:29 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:11 [Format] printf 参数少于格式化占位数 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-11T11:56:36.489Z) - tests\graphs\correct
+- tests\graphs\correct\graph.c:16 [Infinite loop] 循环条件变量 e 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\graph.c:29 [Infinite loop] 循环条件变量 pp 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\graph.c:44 [Infinite loop] 循环条件变量 e 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\main.c:40 [Infinite loop] 循环条件变量 i 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+
+### 识别结果快照 (2025-09-11T12:02:00.877Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_0.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_1.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_1.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_1.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_1.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_10.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_10.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_10.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_10.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_11.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_11.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_11.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_11.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_12.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_12.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_12.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_12.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_13.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_13.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_13.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_13.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_14.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_14.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_14.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_14.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_15.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_15.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_15.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_15.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_16.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_16.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_16.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_16.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_17.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_17.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_17.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_17.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_18.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_18.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_18.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_18.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_19.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_19.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_19.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_19.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_2.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_2.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_2.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_2.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_20.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_20.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_20.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_20.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_21.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_21.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_21.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_21.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_22.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_22.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_22.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_22.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_23.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_23.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_23.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_23.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_24.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_24.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_24.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_24.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_25.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_25.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_25.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_25.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_26.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_26.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_26.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_26.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_27.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_27.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_27.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_27.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_28.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_28.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_28.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_28.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_29.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_29.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_29.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_29.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_3.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_3.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_3.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_3.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_30.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_30.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_30.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_30.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_31.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_31.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_31.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_31.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_32.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_32.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_32.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_32.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_33.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_33.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_33.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_33.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_34.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_34.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_34.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_34.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_35.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_35.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_35.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_35.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_36.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_36.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_36.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_36.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_37.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_37.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_37.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_37.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_38.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_38.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_38.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_38.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_39.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_39.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_39.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_39.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_4.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_4.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_4.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_4.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_40.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_40.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_40.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_40.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_41.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_41.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_41.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_41.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_42.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_42.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_42.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_42.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_43.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_43.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_43.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_43.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_44.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_44.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_44.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_44.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_45.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_45.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_46.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_46.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_46.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_46.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_47.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_47.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_47.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_47.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_48.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_48.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_48.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_48.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_49.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_49.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_49.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_5.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_5.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_5.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_5.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_6.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_6.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_6.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_6.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_7.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_7.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_7.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_7.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_8.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_8.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_8.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_8.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_9.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_9.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_9.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_9.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:15 [Infinite loop] 循环条件变量 e 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:29 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:10 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:11 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\main.c:11 [Format] printf 参数少于格式化占位数 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-11T12:02:01.498Z) - tests\graphs\correct
+- tests\graphs\correct\graph.c:16 [Infinite loop] 循环条件变量 e 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\graph.c:29 [Infinite loop] 循环条件变量 pp 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\graph.c:44 [Infinite loop] 循环条件变量 e 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\main.c:15 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:16 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\correct\main.c:18 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:19 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\correct\main.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:40 [Infinite loop] 循环条件变量 i 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+
+### 识别结果快照 (2025-09-11T12:15:11.520Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_0.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_1.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_1.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_1.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_1.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_10.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_10.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_10.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_10.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_11.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_11.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_11.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_11.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_12.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_12.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_12.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_12.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_13.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_13.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_13.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_13.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_14.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_14.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_14.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_14.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_15.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_15.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_15.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_15.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_16.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_16.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_16.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_16.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_17.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_17.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_17.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_17.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_18.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_18.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_18.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_18.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_19.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_19.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_19.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_19.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_2.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_2.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_2.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_2.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_20.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_20.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_20.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_20.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_21.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_21.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_21.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_21.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_22.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_22.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_22.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_22.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_23.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_23.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_23.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_23.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_24.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_24.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_24.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_24.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_25.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_25.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_25.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_25.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_26.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_26.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_26.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_26.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_27.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_27.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_27.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_27.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_28.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_28.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_28.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_28.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_29.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_29.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_29.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_29.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_3.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_3.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_3.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_3.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_30.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_30.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_30.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_30.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_31.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_31.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_31.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_31.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_32.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_32.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_32.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_32.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_33.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_33.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_33.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_33.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_34.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_34.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_34.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_34.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_35.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_35.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_35.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_35.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_36.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_36.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_36.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_36.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_37.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_37.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_37.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_37.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_38.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_38.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_38.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_38.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_39.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_39.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_39.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_39.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_4.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_4.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_4.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_4.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_40.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_40.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_40.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_40.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_41.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_41.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_41.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_41.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_42.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_42.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_42.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_42.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_43.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_43.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_43.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_43.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_44.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_44.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_44.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_44.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_45.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_45.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_46.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_46.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_46.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_46.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_47.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_47.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_47.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_47.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_48.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_48.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_48.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_48.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_49.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_49.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_49.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_5.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_5.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_5.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_5.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_6.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_6.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_6.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_6.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_7.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_7.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_7.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_7.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_8.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_8.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_8.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_8.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_9.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_9.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_9.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_9.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:15 [Infinite loop] 循环条件变量 e 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:29 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:10 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:11 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\main.c:11 [Format] printf 参数少于格式化占位数 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-11T12:15:12.095Z) - tests\graphs\correct
+- tests\graphs\correct\graph.c:16 [Infinite loop] 循环条件变量 e 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\graph.c:29 [Infinite loop] 循环条件变量 pp 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\graph.c:44 [Infinite loop] 循环条件变量 e 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\main.c:15 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:16 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\correct\main.c:18 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:19 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\correct\main.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:40 [Infinite loop] 循环条件变量 i 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+
+### 识别结果快照 (2025-09-11T12:18:49.097Z) - tests\graphs\correct
+- tests\graphs\correct\graph.c:16 [Infinite loop] 循环条件变量 e 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\graph.c:29 [Infinite loop] 循环条件变量 pp 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\graph.c:44 [Infinite loop] 循环条件变量 e 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\main.c:15 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:16 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\correct\main.c:18 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:19 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\correct\main.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:40 [Infinite loop] 循环条件变量 i 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+
+### 识别结果快照 (2025-09-11T12:18:49.777Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_0.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_1.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_1.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_1.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_1.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_10.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_10.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_10.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_10.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_11.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_11.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_11.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_11.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_12.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_12.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_12.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_12.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_13.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_13.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_13.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_13.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_14.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_14.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_14.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_14.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_15.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_15.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_15.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_15.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_16.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_16.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_16.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_16.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_17.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_17.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_17.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_17.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_18.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_18.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_18.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_18.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_19.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_19.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_19.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_19.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_2.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_2.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_2.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_2.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_20.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_20.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_20.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_20.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_21.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_21.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_21.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_21.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_22.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_22.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_22.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_22.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_23.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_23.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_23.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_23.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_24.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_24.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_24.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_24.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_25.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_25.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_25.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_25.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_26.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_26.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_26.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_26.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_27.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_27.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_27.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_27.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_28.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_28.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_28.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_28.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_29.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_29.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_29.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_29.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_3.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_3.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_3.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_3.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_30.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_30.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_30.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_30.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_31.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_31.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_31.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_31.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_32.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_32.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_32.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_32.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_33.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_33.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_33.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_33.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_34.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_34.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_34.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_34.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_35.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_35.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_35.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_35.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_36.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_36.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_36.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_36.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_37.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_37.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_37.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_37.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_38.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_38.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_38.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_38.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_39.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_39.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_39.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_39.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_4.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_4.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_4.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_4.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_40.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_40.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_40.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_40.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_41.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_41.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_41.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_41.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_42.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_42.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_42.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_42.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_43.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_43.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_43.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_43.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_44.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_44.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_44.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_44.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_45.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_45.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_46.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_46.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_46.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_46.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_47.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_47.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_47.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_47.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_48.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_48.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_48.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_48.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_49.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_49.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_49.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_5.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_5.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_5.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_5.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_6.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_6.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_6.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_6.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_7.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_7.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_7.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_7.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_8.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_8.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_8.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_8.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_9.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_9.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_9.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_9.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:15 [Infinite loop] 循环条件变量 e 可能未更新 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:29 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:10 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:11 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\main.c:11 [Format] printf 参数少于格式化占位数 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-11T12:23:43.356Z) - tests\graphs\correct
+- tests\graphs\correct\graph.c:44 [Infinite loop] 循环条件变量 e 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\main.c:15 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:16 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:18 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:19 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:40 [Infinite loop] 循环条件变量 i 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+
+### 识别结果快照 (2025-09-11T12:23:43.972Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_0.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_1.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_1.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_1.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_1.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_10.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_10.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_10.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_10.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_11.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_11.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_11.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_11.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_12.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_12.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_12.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_12.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_13.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_13.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_13.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_13.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_14.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_14.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_14.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_14.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_15.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_15.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_15.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_15.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_16.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_16.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_16.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_16.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_17.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_17.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_17.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_17.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_18.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_18.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_18.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_18.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_19.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_19.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_19.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_19.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_2.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_2.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_2.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_2.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_20.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_20.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_20.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_20.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_21.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_21.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_21.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_21.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_22.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_22.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_22.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_22.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_23.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_23.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_23.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_23.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_24.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_24.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_24.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_24.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_25.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_25.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_25.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_25.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_26.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_26.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_26.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_26.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_27.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_27.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_27.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_27.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_28.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_28.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_28.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_28.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_29.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_29.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_29.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_29.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_3.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_3.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_3.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_3.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_30.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_30.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_30.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_30.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_31.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_31.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_31.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_31.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_32.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_32.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_32.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_32.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_33.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_33.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_33.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_33.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_34.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_34.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_34.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_34.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_35.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_35.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_35.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_35.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_36.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_36.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_36.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_36.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_37.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_37.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_37.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_37.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_38.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_38.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_38.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_38.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_39.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_39.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_39.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_39.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_4.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_4.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_4.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_4.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_40.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_40.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_40.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_40.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_41.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_41.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_41.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_41.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_42.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_42.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_42.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_42.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_43.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_43.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_43.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_43.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_44.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_44.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_44.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_44.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_45.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_45.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_46.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_46.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_46.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_46.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_47.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_47.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_47.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_47.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_48.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_48.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_48.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_48.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_49.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_49.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_49.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_5.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_5.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_5.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_5.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_6.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_6.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_6.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_6.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_7.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_7.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_7.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_7.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_8.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_8.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_8.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_8.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_9.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_9.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_9.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_9.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:29 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:10 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:11 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:11 [Format] printf 参数少于格式化占位数 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-11T12:34:35.046Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_0.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_1.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_1.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_1.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_1.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_10.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_10.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_10.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_10.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_11.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_11.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_11.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_11.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_12.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_12.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_12.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_12.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_13.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_13.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_13.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_13.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_14.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_14.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_14.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_14.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_15.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_15.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_15.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_15.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_16.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_16.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_16.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_16.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_17.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_17.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_17.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_17.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_18.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_18.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_18.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_18.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_19.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_19.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_19.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_19.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_2.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_2.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_2.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_2.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_20.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_20.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_20.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_20.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_21.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_21.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_21.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_21.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_22.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_22.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_22.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_22.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_23.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_23.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_23.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_23.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_24.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_24.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_24.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_24.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_25.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_25.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_25.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_25.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_26.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_26.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_26.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_26.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_27.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_27.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_27.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_27.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_28.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_28.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_28.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_28.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_29.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_29.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_29.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_29.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_3.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_3.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_3.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_3.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_30.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_30.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_30.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_30.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_31.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_31.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_31.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_31.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_32.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_32.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_32.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_32.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_33.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_33.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_33.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_33.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_34.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_34.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_34.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_34.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_35.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_35.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_35.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_35.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_36.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_36.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_36.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_36.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_37.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_37.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_37.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_37.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_38.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_38.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_38.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_38.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_39.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_39.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_39.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_39.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_4.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_4.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_4.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_4.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_40.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_40.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_40.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_40.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_41.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_41.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_41.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_41.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_42.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_42.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_42.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_42.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_43.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_43.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_43.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_43.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_44.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_44.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_44.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_44.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_45.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_45.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_46.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_46.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_46.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_46.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_47.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_47.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_47.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_47.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_48.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_48.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_48.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_48.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_49.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_49.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_49.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_5.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_5.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_5.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_5.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_6.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_6.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_6.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_6.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_7.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_7.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_7.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_7.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_8.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_8.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_8.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_8.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_9.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_9.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_9.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_9.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:7 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:23 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:24 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\graph.c:29 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:10 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:11 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:11 [Format] printf 参数少于格式化占位数 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-11T12:34:35.705Z) - tests\graphs\correct
+- tests\graphs\correct\graph.c:44 [Infinite loop] 循环条件变量 e 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\main.c:15 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:16 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:18 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:19 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:40 [Infinite loop] 循环条件变量 i 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+
+### 识别结果快照 (2025-09-11T12:42:37.359Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_0.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_1.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_1.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_1.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_1.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_10.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_10.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_10.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_10.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_11.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_11.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_11.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_11.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_12.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_12.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_12.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_12.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_13.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_13.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_13.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_13.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_14.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_14.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_14.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_14.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_15.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_15.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_15.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_15.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_16.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_16.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_16.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_16.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_17.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_17.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_17.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_17.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_18.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_18.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_18.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_18.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_19.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_19.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_19.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_19.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_2.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_2.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_2.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_2.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_20.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_20.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_20.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_20.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_21.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_21.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_21.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_21.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_22.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_22.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_22.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_22.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_23.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_23.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_23.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_23.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_24.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_24.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_24.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_24.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_25.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_25.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_25.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_25.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_26.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_26.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_26.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_26.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_27.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_27.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_27.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_27.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_28.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_28.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_28.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_28.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_29.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_29.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_29.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_29.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_3.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_3.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_3.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_3.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_30.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_30.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_30.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_30.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_31.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_31.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_31.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_31.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_32.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_32.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_32.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_32.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_33.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_33.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_33.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_33.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_34.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_34.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_34.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_34.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_35.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_35.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_35.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_35.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_36.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_36.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_36.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_36.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_37.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_37.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_37.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_37.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_38.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_38.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_38.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_38.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_39.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_39.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_39.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_39.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_4.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_4.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_4.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_4.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_40.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_40.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_40.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_40.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_41.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_41.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_41.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_41.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_42.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_42.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_42.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_42.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_43.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_43.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_43.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_43.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_44.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_44.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_44.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_44.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_45.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_45.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_46.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_46.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_46.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_46.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_47.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_47.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_47.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_47.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_48.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_48.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_48.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_48.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_49.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_49.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_49.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_5.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_5.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_5.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_5.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_6.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_6.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_6.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_6.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_7.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_7.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_7.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_7.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_8.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_8.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_8.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_8.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_9.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_9.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_9.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_9.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:7 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:23 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:24 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\graph.c:29 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:10 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:11 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:11 [Format] printf 参数少于格式化占位数 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-11T12:42:37.921Z) - tests\graphs\correct
+- tests\graphs\correct\graph.c:44 [Infinite loop] 循环条件变量 e 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\main.c:15 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:16 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:18 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:19 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:40 [Infinite loop] 循环条件变量 i 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+
+### 识别结果快照 (2025-09-11T12:45:44.314Z) - tests\graphs\correct
+- tests\graphs\correct\graph.c:44 [Infinite loop] 循环条件变量 e 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\main.c:15 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:16 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:18 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:19 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:40 [Infinite loop] 循环条件变量 i 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+
+### 识别结果快照 (2025-09-11T12:45:44.966Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_0.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_1.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_1.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_1.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_1.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_10.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_10.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_10.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_10.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_11.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_11.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_11.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_11.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_12.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_12.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_12.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_12.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_13.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_13.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_13.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_13.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_14.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_14.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_14.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_14.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_15.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_15.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_15.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_15.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_16.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_16.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_16.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_16.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_17.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_17.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_17.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_17.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_18.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_18.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_18.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_18.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_19.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_19.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_19.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_19.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_2.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_2.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_2.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_2.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_20.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_20.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_20.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_20.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_21.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_21.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_21.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_21.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_22.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_22.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_22.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_22.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_23.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_23.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_23.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_23.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_24.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_24.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_24.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_24.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_25.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_25.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_25.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_25.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_26.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_26.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_26.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_26.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_27.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_27.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_27.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_27.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_28.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_28.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_28.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_28.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_29.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_29.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_29.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_29.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_3.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_3.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_3.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_3.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_30.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_30.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_30.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_30.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_31.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_31.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_31.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_31.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_32.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_32.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_32.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_32.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_33.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_33.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_33.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_33.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_34.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_34.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_34.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_34.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_35.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_35.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_35.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_35.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_36.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_36.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_36.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_36.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_37.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_37.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_37.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_37.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_38.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_38.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_38.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_38.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_39.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_39.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_39.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_39.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_4.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_4.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_4.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_4.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_40.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_40.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_40.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_40.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_41.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_41.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_41.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_41.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_42.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_42.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_42.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_42.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_43.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_43.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_43.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_43.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_44.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_44.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_44.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_44.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_45.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_45.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_46.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_46.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_46.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_46.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_47.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_47.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_47.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_47.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_48.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_48.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_48.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_48.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_49.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_49.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_49.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_5.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_5.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_5.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_5.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_6.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_6.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_6.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_6.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_7.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_7.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_7.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_7.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_8.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_8.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_8.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_8.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_9.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_9.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_9.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_9.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:7 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:23 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:24 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\graph.c:29 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:10 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:11 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:11 [Format] printf 参数少于格式化占位数 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-11T12:47:57.119Z) - tests\graphs\correct
+- tests\graphs\correct\graph.c:44 [Infinite loop] 循环条件变量 e 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\main.c:40 [Infinite loop] 循环条件变量 i 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+
+### 识别结果快照 (2025-09-11T12:57:45.431Z) - tests\graphs\correct
+- tests\graphs\correct\graph.c:44 [Infinite loop] 循环条件变量 e 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\correct\main.c:40 [Infinite loop] 循环条件变量 i 未在更新段修改 - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+
+### 识别结果快照 (2025-09-11T12:57:46.137Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_0.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_1.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_1.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_1.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_1.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_10.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_10.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_10.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_10.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_11.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_11.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_11.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_11.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_12.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_12.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_12.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_12.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_13.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_13.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_13.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_13.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_14.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_14.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_14.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_14.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_15.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_15.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_15.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_15.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_16.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_16.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_16.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_16.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_17.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_17.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_17.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_17.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_18.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_18.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_18.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_18.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_19.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_19.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_19.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_19.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_2.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_2.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_2.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_2.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_20.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_20.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_20.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_20.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_21.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_21.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_21.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_21.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_22.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_22.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_22.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_22.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_23.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_23.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_23.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_23.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_24.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_24.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_24.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_24.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_25.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_25.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_25.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_25.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_26.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_26.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_26.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_26.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_27.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_27.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_27.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_27.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_28.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_28.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_28.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_28.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_29.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_29.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_29.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_29.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_3.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_3.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_3.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_3.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_30.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_30.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_30.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_30.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_31.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_31.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_31.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_31.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_32.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_32.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_32.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_32.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_33.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_33.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_33.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_33.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_34.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_34.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_34.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_34.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_35.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_35.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_35.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_35.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_36.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_36.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_36.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_36.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_37.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_37.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_37.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_37.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_38.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_38.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_38.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_38.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_39.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_39.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_39.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_39.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_4.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_4.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_4.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_4.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_40.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_40.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_40.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_40.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_41.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_41.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_41.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_41.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_42.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_42.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_42.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_42.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_43.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_43.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_43.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_43.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_44.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_44.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_44.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_44.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_45.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_45.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_46.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_46.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_46.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_46.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_47.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_47.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_47.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_47.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_48.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_48.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_48.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_48.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_49.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_49.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_49.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_5.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_5.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_5.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_5.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_6.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_6.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_6.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_6.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_7.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_7.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_7.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_7.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_8.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_8.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_8.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_8.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_9.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_9.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Format] scanf 实参建议传地址（使用 &var） - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_9.c:7 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\bug_9.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:7 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:23 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:24 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\graph.c:29 [Infinite loop] 潜在死循环（for(;;)） - 建议: 确保条件变量在迭代中更新，或加入退出条件/break/超时
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:11 [Format] printf 参数少于格式化占位数 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-11T13:30:36.792Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_1.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_1.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_10.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_10.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_11.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_11.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_12.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_12.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_13.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_13.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_14.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_14.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_15.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_15.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_16.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_16.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_17.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_17.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_18.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_18.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_19.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_19.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_2.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_2.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_20.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_20.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_21.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_21.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_22.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_22.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_23.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_23.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_24.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_24.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_25.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_25.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_26.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_26.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_27.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_27.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_28.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_28.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_29.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_29.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_3.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_3.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_30.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_30.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_31.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_31.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_32.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_32.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_33.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_33.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_34.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_34.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_35.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_35.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_36.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_36.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_37.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_37.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_38.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_38.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_39.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_39.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_4.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_4.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_40.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_40.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_41.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_41.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_42.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_42.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_43.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_43.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_44.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_44.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_45.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_46.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_46.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_47.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_47.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_48.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_48.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_49.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_5.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_5.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_6.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_6.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_7.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_7.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_8.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_8.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_9.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_9.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:7 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:23 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:24 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:10 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:11 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:53 [Format] format specifies type 'char *' but the argument has type 'int' - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-11T13:30:41.391Z) - tests\graphs\correct
+- tests\graphs\correct\main.c:15 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:16 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\correct\main.c:18 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:19 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\correct\main.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+
+### 识别结果快照 (2025-09-11T13:38:40.433Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_1.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_1.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_1.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_10.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_10.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_10.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_11.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_11.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_11.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_12.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_12.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_12.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_13.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_13.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_13.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_14.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_14.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_14.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_15.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_15.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_15.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_16.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_16.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_16.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_17.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_17.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_17.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_18.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_18.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_18.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_19.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_19.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_19.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_2.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_2.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_2.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_20.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_20.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_20.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_21.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_21.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_21.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_22.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_22.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_22.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_23.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_23.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_23.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_24.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_24.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_24.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_25.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_25.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_25.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_26.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_26.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_26.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_27.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_27.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_27.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_28.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_28.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_28.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_29.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_29.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_29.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_3.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_3.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_3.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_30.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_30.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_30.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_31.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_31.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_31.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_32.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_32.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_32.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_33.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_33.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_33.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_34.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_34.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_34.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_35.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_35.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_35.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_36.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_36.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_36.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_37.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_37.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_37.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_38.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_38.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_38.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_39.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_39.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_39.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_4.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_4.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_4.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_40.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_40.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_40.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_41.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_41.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_41.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_42.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_42.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_42.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_43.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_43.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_43.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_44.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_44.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_44.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_45.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_46.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_46.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_46.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_47.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_47.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_47.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_48.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_48.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_48.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_49.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_5.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_5.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_5.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_6.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_6.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_6.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_7.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_7.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_7.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_8.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_8.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_8.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_9.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_9.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_9.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:7 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:23 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:24 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:10 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:13 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:53 [Format] format specifies type 'char *' but the argument has type 'int' - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-11T13:38:47.630Z) - tests\graphs\correct
+- tests\graphs\correct\main.c:15 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:18 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\correct\main.c:20 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:22 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\correct\main.c:39 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+
+### 识别结果快照 (2025-09-11T13:55:57.191Z) - tests\graphs\correct
+- tests\graphs\correct\main.c:15 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:18 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\correct\main.c:20 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:22 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\correct\main.c:39 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+
+### 识别结果快照 (2025-09-13T13:00:31.809Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:21 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:22 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:26 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:7 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:23 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:24 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:10 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:13 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_50.c:26 [Wild pointer] Dereference of null pointer (loaded from variable 'static_ptr') - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:53 [Format] format specifies type 'char *' but the argument has type 'int' - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*

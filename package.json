@@ -1,0 +1,50 @@
+{
+  "name": "c-safety-scanner",
+  "displayName": "C Safety Scanner",
+  "description": "扫描用户目录下所有 .c 文件，检测未初始化变量、野指针、printf/scanf 误用、潜在死循环。",
+  "version": "0.0.1",
+  "publisher": "localdev",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Linters"
+  ],
+  "activationEvents": [
+    "onCommand:cscan.scanHomeC",
+    "onCommand:cscan.scanWorkspaceC"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "cscan.scanHomeC",
+        "title": "C Safety Scanner: 扫描用户目录 C 文件"
+      },
+      {
+        "command": "cscan.scanWorkspaceC",
+        "title": "C Safety Scanner: 扫描工作区 C 文件"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "echo 'no lint configured'",
+    "test": "node ./out/cli.js",
+    "gen:buggy": "node scripts/gen_buggy_graphs.js",
+    "scan:correct": "node ./out/cli.js tests/graphs/correct",
+    "scan:buggy": "node ./out/cli.js tests/graphs/buggy",
+    "report:buggy": "node ./out/report.js tests/graphs/buggy",
+    "report:correct": "node ./out/report.js tests/graphs/correct",
+    "vsce:package": "npx vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.50",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.6.0",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {}
+}

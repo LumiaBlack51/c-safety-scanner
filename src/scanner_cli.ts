@@ -438,6 +438,7 @@ interface MemoryAllocation {
   variable: string;
   size: string;
   isFreed: boolean;
+  reported: boolean; // 是否已经报告过
 }
 
 function detectMemoryAllocation(line: string, lineNum: number): MemoryAllocation | null {
@@ -448,7 +449,8 @@ function detectMemoryAllocation(line: string, lineNum: number): MemoryAllocation
       line: lineNum,
       variable: mallocMatch[1],
       size: 'unknown',
-      isFreed: false
+      isFreed: false,
+      reported: false
     };
   }
   return null;
@@ -559,6 +561,7 @@ export function analyzeCFile(filePath: string): { issues: Issue[]; globals: Segm
   const funcStack: string[] = [];
   const localsByFuncFB: Map<string, SegmentedTable> = new Map();
   const memoryAllocations: MemoryAllocation[] = [];
+  let hasMemoryAllocation = false; // 是否有内存分配
   const currentLocals = (): SegmentedTable | null => {
     const fname = funcStack[funcStack.length - 1];
     if (!fname) return null;
@@ -590,20 +593,23 @@ export function analyzeCFile(filePath: string): { issues: Issue[]; globals: Segm
       else if (ch === '}') { 
         braceDepth = Math.max(0, braceDepth - 1); 
         if (braceDepth < funcStack.length) {
-          // 函数结束时检查内存泄漏
-          const currentFunc = funcStack[funcStack.length - 1];
-          if (currentFunc) {
-            // 只检查当前函数内的内存泄漏
-            const currentFuncStart = findFunctionStart(lines, currentFunc);
-            for (const alloc of memoryAllocations) {
-              if (!alloc.isFreed && alloc.line >= currentFuncStart && alloc.line <= i + 1) {
-                fallbackIssues.push({
-                  file: filePath,
-                  line: alloc.line,
-                  category: 'Memory leak',
-                  message: `内存泄漏：变量${alloc.variable}分配的内存未释放`,
-                  codeLine: lines[alloc.line - 1] || ''
-                });
+          // 函数结束时检查内存泄漏（只在有内存分配时才检测）
+          if (hasMemoryAllocation) {
+            const currentFunc = funcStack[funcStack.length - 1];
+            if (currentFunc) {
+              // 只检查当前函数内的内存泄漏
+              const currentFuncStart = findFunctionStart(lines, currentFunc);
+              for (const alloc of memoryAllocations) {
+                if (!alloc.isFreed && !alloc.reported && alloc.line >= currentFuncStart && alloc.line <= i + 1) {
+                  fallbackIssues.push({
+                    file: filePath,
+                    line: alloc.line,
+                    category: 'Memory leak',
+                    message: `内存泄漏：变量${alloc.variable}分配的内存未释放`,
+                    codeLine: lines[alloc.line - 1] || ''
+                  });
+                  alloc.reported = true; // 标记为已报告
+                }
               }
             }
           }
@@ -682,6 +688,7 @@ export function analyzeCFile(filePath: string): { issues: Issue[]; globals: Segm
     const allocation = detectMemoryAllocation(line, i + 1);
     if (allocation) {
       memoryAllocations.push(allocation);
+      hasMemoryAllocation = true; // 标记有内存分配
     }
     
     // 内存释放检测

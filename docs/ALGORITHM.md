@@ -1,129 +1,216 @@
-## C Safety Scanner - 算法设计与伪代码
+# C Safety Scanner 算法设计文档
 
-本工具采用轻量级启发式的行级解析与符号跟踪，构建分段哈希表（全局、按函数局部），在不引入完整 AST/编译器前端的前提下覆盖常见的 C 代码缺陷场景。
+## 概述
 
-### 核心数据结构
-- 分段哈希表（a-f, g-m, n-s, t-z）
-  - `globals[4] : Map<string, Var>`
-  - `localsByFunc: Map<string, SegmentedTable>`
-- `Var`：`{ name, typeName, isPointer, isInitialized }`
+C Safety Scanner 是一个基于启发式分析的 C 代码安全扫描工具，使用行级正则表达式解析和分段哈希表来检测常见的编程错误。
 
-### 通用流程（伪代码）
-```
-for file in files:
-  lines = read(file)
-  funcStack = []
-  globals = segmentedTable()
-  localsByFunc = {}
-  for i, raw in enumerate(lines):
-    line = trim(remove_line_comment(raw))
-    if in_multiline_define: handle_continue; continue
-    if line startswith #include: check_std_header(line)
-    if line startswith #define: set in_multiline_define if endswith '\\'; continue
-    update_brace_and_function_stack(raw)
+## 核心架构
 
-    if is_decl(line):
-      for dec in parse_decl(line):
-        tab = (funcStack.top ? localsByFunc[func] : globals)
-        tab.set(dec.name, Var(dec.name, dec.type, isPtr(dec), dec.inited))
-      continue
+### 1. 解析策略
+- **启发式解析**: 使用基于正则表达式的行级解析，稳定可靠
+- **分段哈希表**: 使用4段哈希表优化变量查找性能 (a-f, g-m, n-s, t-z)
+- **作用域管理**: 支持全局和函数局部作用域的变量管理
 
-    if matches for(...): analyze_for_header(update_block)
-    if matches while(...): analyze_while_body_lookahead(window=20)
+### 2. 数据结构
 
-    names = all_names(globals, localsByFunc[funcStack.top])
-    for name in names:
-      if assignment_to(line, name): mark_initialized(name)
+```typescript
+type VariableInfo = {
+  name: string;           // 变量名
+  typeName: string;       // 类型名（支持存储类说明符）
+  isPointer: boolean;     // 是否为指针
+  isInitialized: boolean; // 是否已初始化
+  isArray?: boolean;      // 是否为数组
+  pointerMaybeNull?: boolean; // 指针是否可能为NULL
+};
 
-    if is_function_call(line):
-      for arg in args(line):
-        name = extract_name(arg)
-        if startswith '&' or is_pointer(name): mark_initialized(name)
-
-    for name in names:
-      if used_in(line, name) and not initialized(name):
-        if is_pointer(name) and deref_in(line, name): warn(WildPointer)
-        else warn(Uninitialized)
-
-    if printf/scanf call: check_format_args(line)
+type SegmentedTable = Array<Map<string, VariableInfo>>; // 4段哈希表
 ```
 
-### 关键检测
+## 检测算法
 
-#### 1) 未初始化（Initialization）
-- 检测点：出现 `name` 的 token、但未见 `name = ...`/`name += ...` 等写入。
-- 传播：
-  - 函数调用中 `&name` 或 `name` 为指针形参 → 视作“可能写入”后置为已初始化。
-  - 常见写入 API 可加入白名单扩展（memset/read/fread/strcpy...）。
+### 1. 变量声明识别
 
-伪代码：
-```
-if tokenContains(line, name):
-  if looksAssignmentTo(line, name): set init(name)=true
-  else if isCall(line) and (&name in args or isPointer(name)): set init(name)=true
-  else if not init(name): warn(Uninitialized)
-```
+**算法**: `parseDecl(line: string)`
 
-修改建议：
-- 在首次使用前显式赋值；对需要在函数中写入的变量按址传递；数组/缓冲区可在写入后再使用。
-
-#### 2) 野指针（Wild pointer）/ 空指针
-- 条件：`isPointer(name) && not init(name) && deref_in(line, name)`。
-- 空指针：若最近一次赋值为 `NULL/0` 且解引用，则提示空指针解引用。
-
-伪代码：
-```
-if isPointer(name) and not init(name) and (
-   match("*name") or match("name->") or match("name[")
-): warn(WildPointer)
-```
-
-修改建议：
-- 声明即初始化或置 NULL 并检查；动态内存申请后检查返回值；遍历时推进指针。
-
-#### 3) 死循环（Infinite loop）
-- for：解析 `(init; cond; update)`，若 `condVar` 存在但 `update` 未包含 `condVar` 的 `++/--/赋值`，或 `for(;;)` 则报警。
-- while：提取条件变量 `cv`，在后 20 行窗口中查找 `cv++/cv--/cv op= .../cv = cv->next/cv = cv ± k` 等更新；`while(1|true)` 直接报警。
-
-伪代码：
-```
-if match("for(..)"):
-  cv = extract_cond_var(cond)
-  if for(;;): warn(InfLoop)
-  else if cv and not updates(cv, update): warn(InfLoop)
-
-if match("while(cv ..)"):
-  win = next_lines(20)
-  if not updates(cv, win): warn(InfLoop)
+```pseudocode
+function parseDecl(line):
+  // 支持存储类说明符的正则表达式
+  pattern = /^\s*((?:static|const|extern|register|volatile|restrict)\s+)?([a-zA-Z_][\w\s\*]*?)\s+(.+)$/
+  match = line.match(pattern)
+  if not match: return []
+  
+  storageClass = match[1] ? match[1].trim() : ''
+  baseType = match[2].trim()
+  declarations = match[3]
+  
+  // 组合完整的类型名
+  fullType = storageClass ? storageClass + " " + baseType : baseType
+  
+  for each declaration in declarations.split(','):
+    // 解析变量名、指针状态、初始化状态
+    name = extractVariableName(declaration)
+    isPointer = checkPointerSyntax(declaration, baseType)
+    isInitialized = checkInitialization(declaration)
+    
+    result.add({name, typeName: fullType, isPointer, isInitialized})
+  
+  return result
 ```
 
-修改建议：
-- 确保条件变量更新；链表遍历中推进指针；忙等加入 break/超时。
+**支持的类型**:
+- 基本类型: `int`, `char`, `float`, `double`, `void`, `short`, `long`, `signed`, `unsigned`, `bool`, `size_t`
+- 存储类说明符: `static`, `const`, `extern`, `register`, `volatile`, `restrict`
+- 组合类型: `static int`, `const char*`, `static const int` 等
 
-#### 4) 格式化（printf/scanf）
-修改建议：
-- 参数数量与占位相符；scanf 非字符串参数添加 &；为 %s 使用 char* 或字符数组。
+### 2. 未初始化变量检测
 
-- 统计 `%` 数，与实参数对比；
-- scanf：非字符串/数组需 `&`；
-- 可扩展：`%d/%f/%s/%p` 与变量表的类型比对，输出 `expected` vs `actual`。
+**算法**: 变量使用前检查初始化状态
 
-伪代码：
+```pseudocode
+function checkUninitializedUse(line, variableName):
+  var = getVariable(variableName)
+  if not var or var.isInitialized:
+    return false
+  
+  // 检查是否在赋值左侧
+  if isAssignmentLeftSide(line, variableName):
+    return false
+  
+  // 检查是否为函数参数
+  if isFunctionParameter(variableName):
+    return false
+  
+  return true
 ```
-cnt = count_specifiers(fmt)
-if args-1 != cnt: warn(FormatCount)
-if is_scanf:
-  for arg in args[1:]: if not startswith('&') and not is_char_array(arg): warn(NeedAddress)
+
+**检测规则**:
+- 变量在首次使用前必须显式初始化
+- 函数参数视为已初始化
+- 赋值左侧的变量不报错
+- 支持按址传递参数的识别
+
+### 3. 野指针检测
+
+**算法**: 指针解引用前检查初始化状态
+
+```pseudocode
+function checkWildPointer(line, pointerName):
+  var = getVariable(pointerName)
+  if not var or not var.isPointer:
+    return false
+  
+  if not var.isInitialized:
+    return true
+  
+  // 检查指针是否可能为NULL
+  if var.pointerMaybeNull and isDereference(line, pointerName):
+    return true
+  
+  return false
 ```
 
-### 误报控制
-- 忽略：预处理指令、宏多行、行内注释。
-- 指针遍历更新：识别 `cv = cv->next`、`cv = cv ± k`。
-- 调用按址写入：将 `&name` 和指针实参视为“可能写入”。
+**检测模式**:
+- `*pointer` - 直接解引用
+- `pointer->field` - 结构体成员访问
+- `pointer[index]` - 数组访问
 
-### 后续增强方向
-- 更精细的数据流分析（基本块/支配关系/SSA 简化）；
-- 类型系统与格式化占位更严格匹配；
-- VS Code 侧提供 CodeAction 快速修复建议（自动加 `&`、初始化模板等）。
+**指针初始化识别**:
+- `= NULL` 或 `= 0` → `pointerMaybeNull = true`
+- `= &variable` → `pointerMaybeNull = false`
+- `= malloc/calloc/realloc(...)` → `pointerMaybeNull = false`
+- `= function_call(...)` → `pointerMaybeNull = false`
 
+### 4. 头文件拼写检查
 
+**算法**: 检查非标准头文件名称
+
+```pseudocode
+function checkHeaderSpelling(line):
+  if line.startsWith('#include <'):
+    header = extractHeaderName(line)
+    if header not in standardHeaders:
+      reportError("可疑标准头文件: " + header)
+```
+
+**标准头文件列表**:
+`assert.h`, `complex.h`, `ctype.h`, `errno.h`, `fenv.h`, `float.h`, `inttypes.h`, `iso646.h`, `limits.h`, `locale.h`, `math.h`, `setjmp.h`, `signal.h`, `stdalign.h`, `stdarg.h`, `stdatomic.h`, `stdbool.h`, `stddef.h`, `stdint.h`, `stdio.h`, `stdlib.h`, `stdnoreturn.h`, `string.h`, `tgmath.h`, `threads.h`, `time.h`, `uchar.h`, `wchar.h`, `wctype.h`
+
+### 5. 作用域管理
+
+**算法**: 使用函数栈和作用域表管理变量可见性
+
+```pseudocode
+function manageScope():
+  funcStack = []  // 函数调用栈
+  braceDepth = 0  // 大括号深度
+  
+  for each line in file:
+    // 更新大括号深度
+    for each char in line:
+      if char == '{': braceDepth++
+      if char == '}': 
+        braceDepth = max(0, braceDepth - 1)
+        if braceDepth < funcStack.length:
+          funcStack.pop()
+    
+    // 检测函数定义
+    if isFunctionDefinition(line):
+      funcName = extractFunctionName(line)
+      funcStack.push(funcName)
+    
+    // 变量声明处理
+    if isVariableDeclaration(line):
+      variables = parseDecl(line)
+      scope = getCurrentScope(braceDepth, funcStack)
+      for var in variables:
+        scope.add(var)
+```
+
+## 性能优化
+
+### 1. 分段哈希表
+- 将变量名按首字母分为4段: a-f, g-m, n-s, t-z
+- 减少哈希冲突，提高查找效率
+
+### 2. 正则表达式优化
+- 预编译常用正则表达式
+- 使用高效的模式匹配
+
+### 3. 作用域缓存
+- 缓存当前作用域的变量表
+- 避免重复查找
+
+## 当前限制
+
+### 1. 未实现的检测
+- **死循环检测**: `for(;;)`, `while(1)` 等
+- **内存泄漏检测**: malloc/free 配对检查
+- **printf/scanf格式检查**: 参数类型和数量匹配
+- **函数返回值检查**: 未检查函数调用的返回值
+
+### 2. 误报原因
+- 按址传递参数的复杂场景识别不完整
+- 函数调用返回值的使用场景
+- 复杂表达式的变量使用检测
+
+### 3. 漏报原因
+- 仅在使用时检测，不在声明时检测
+- 缺少高级控制流分析
+- 缺少跨函数的数据流分析
+
+## 性能指标
+
+当前版本性能指标:
+- **Precision**: 61.1%
+- **Recall**: 50%
+- **F1**: 55%
+- **总检测**: 18个问题
+- **预置BUG**: 22个
+
+## 改进方向
+
+1. **增强死循环检测**: 实现 `for(;;)`, `while(1)` 检测
+2. **内存泄漏检测**: 实现 malloc/free 配对检查
+3. **格式字符串检查**: 实现 printf/scanf 参数匹配
+4. **函数返回值检查**: 检查函数调用的返回值使用
+5. **改进按址传递识别**: 减少函数调用相关的误报

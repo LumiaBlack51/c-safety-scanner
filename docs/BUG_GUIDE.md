@@ -43,3 +43,23 @@
 - 支持 static、const、extern 等存储类说明符识别
 - 函数参数正确识别，避免误报
 - 性能指标：Precision 64.7%, Recall 50%, F1 56.4%
+
+### 识别结果快照 (2025-09-13T13:18:20.727Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:22 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:22 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:26 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:7 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:23 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:24 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:10 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:13 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:13 [Uninitialized] 2nd function call argument is an uninitialized value - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:26 [Wild pointer] Dereference of null pointer (loaded from variable 'static_ptr') - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:53 [Format] format specifies type 'char *' but the argument has type 'int' - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*

@@ -135,7 +135,101 @@ function checkHeaderSpelling(line):
 **标准头文件列表**:
 `assert.h`, `complex.h`, `ctype.h`, `errno.h`, `fenv.h`, `float.h`, `inttypes.h`, `iso646.h`, `limits.h`, `locale.h`, `math.h`, `setjmp.h`, `signal.h`, `stdalign.h`, `stdarg.h`, `stdatomic.h`, `stdbool.h`, `stddef.h`, `stdint.h`, `stdio.h`, `stdlib.h`, `stdnoreturn.h`, `string.h`, `tgmath.h`, `threads.h`, `time.h`, `uchar.h`, `wchar.h`, `wctype.h`
 
-### 5. 作用域管理
+### 5. 死循环检测
+
+**算法**: 通过模拟循环执行来检测潜在的死循环
+
+```pseudocode
+function detectDeadLoop(line, lineNum):
+  loopInfo = extractLoopInfo(line, lineNum)
+  if not loopInfo: return false
+  
+  // 检查循环体内是否有break或return
+  loopEnd = findLoopEnd(lines, lineNum)
+  hasBreak = checkForBreakOrReturn(lines, lineNum, loopEnd)
+  if hasBreak: return false
+  
+  // 模拟循环执行
+  return simulateLoopExecution(loopInfo)
+
+function extractLoopInfo(line, lineNum):
+  // 检测明显的死循环
+  if matches(line, "for(;;)") or matches(line, "while(1)"):
+    return {type: "for/while", condition: "true", line: lineNum}
+  
+  // 检测for循环
+  if match = line.match("for\\(([^;]*);([^;]*);([^)]*)\\)"):
+    return {type: "for", init: match[1], condition: match[2], update: match[3], line: lineNum}
+  
+  // 检测while循环
+  if match = line.match("while\\(([^)]+)\\)"):
+    return {type: "while", condition: match[1], line: lineNum}
+
+function simulateLoopExecution(loopInfo):
+  // 明显的死循环
+  if loopInfo.condition == "true" or loopInfo.condition == "1":
+    return true
+  
+  // 分析for循环
+  if loopInfo.type == "for":
+    return analyzeForLoop(loopInfo.init, loopInfo.condition, loopInfo.update)
+  
+  // 分析while循环
+  if loopInfo.type == "while":
+    return analyzeWhileLoop(loopInfo.condition)
+
+function analyzeForLoop(init, condition, update):
+  // 提取循环变量和初始值
+  initMatch = init.match("([a-zA-Z_]\\w*)\\s*=\\s*([+-]?\\d+(?:\\.\\d+)?)")
+  if not initMatch: return false
+  
+  varName = initMatch[1]
+  initValue = parseFloat(initMatch[2])
+  
+  // 解析条件
+  condMatch = condition.match(varName + "\\s*([<>=!]+)\\s*([+-]?\\d+(?:\\.\\d+)?)")
+  if not condMatch: return false
+  
+  operator = condMatch[1]
+  targetValue = parseFloat(condMatch[2])
+  
+  // 解析更新表达式
+  step = extractStep(update, varName)
+  if step == null: return false
+  
+  // 模拟迭代
+  return simulateIterations(initValue, operator, targetValue, step)
+
+function simulateIterations(initValue, operator, targetValue, step):
+  currentValue = initValue
+  maxIterations = 100000
+  
+  for i = 0 to maxIterations:
+    if checkExitCondition(currentValue, operator, targetValue):
+      return false  // 不是死循环
+    
+    currentValue += step
+    
+    // 检查溢出
+    if abs(currentValue) > 1e10:
+      return true  // 可能是死循环
+  
+  return true  // 超过最大迭代次数，认为是死循环
+```
+
+**检测类型**:
+- **明显死循环**: `for(;;)`, `while(1)`, `while(true)`
+- **循环条件错误**: 循环变量永远不会满足退出条件
+- **步长问题**: 循环变量步长过大或过小，跳过或无法达到退出条件
+- **浮点精度问题**: 浮点数循环由于精度问题无法达到目标值
+
+**检测规则**:
+- 如果循环体内有`break`、`return`或`exit()`，不报告为死循环
+- 模拟最多10万次迭代来检查循环是否能退出
+- 支持常见的循环变量更新模式：`i++`, `i--`, `i += n`, `i -= n`
+- 检查循环条件中的比较操作符：`<`, `<=`, `>`, `>=`, `==`, `!=`
+
+### 6. 作用域管理
 
 **算法**: 使用函数栈和作用域表管理变量可见性
 
@@ -183,7 +277,6 @@ function manageScope():
 ## 当前限制
 
 ### 1. 未实现的检测
-- **死循环检测**: `for(;;)`, `while(1)` 等
 - **内存泄漏检测**: malloc/free 配对检查
 - **printf/scanf格式检查**: 参数类型和数量匹配
 - **函数返回值检查**: 未检查函数调用的返回值
@@ -209,8 +302,8 @@ function manageScope():
 
 ## 改进方向
 
-1. **增强死循环检测**: 实现 `for(;;)`, `while(1)` 检测
-2. **内存泄漏检测**: 实现 malloc/free 配对检查
-3. **格式字符串检查**: 实现 printf/scanf 参数匹配
-4. **函数返回值检查**: 检查函数调用的返回值使用
-5. **改进按址传递识别**: 减少函数调用相关的误报
+1. **内存泄漏检测**: 实现 malloc/free 配对检查
+2. **格式字符串检查**: 实现 printf/scanf 参数匹配
+3. **函数返回值检查**: 检查函数调用的返回值使用
+4. **改进按址传递识别**: 减少函数调用相关的误报
+5. **增强死循环检测**: 支持更复杂的循环条件和嵌套循环分析

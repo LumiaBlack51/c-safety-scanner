@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { analyzeDir } from './scanner_cli';
+import { analyzeDir } from '../core/scanner_cli';
 
 function printIssues(issues: any[]) {
   for (const issue of issues) {

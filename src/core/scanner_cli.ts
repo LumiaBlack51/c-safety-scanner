@@ -1,12 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { Issue, VariableInfo, SegmentedTable, MemoryAllocation, LoopInfo, TypeRange } from './types';
+import { Issue, VariableInfo, SegmentedTable, MemoryAllocation, LoopInfo, TypeRange } from '../interfaces/types';
 export { Issue };
-import { createSegmentedTable, segSet, segGet, segAllNames } from './segmented_table';
-import { functionHeaderMap } from './function_header_map';
-import { getTypeRange, checkValueRange, extractNumericValue, checkAssignmentRange, checkInitializationRange } from './range_checker';
-import { formatSpecCount, extractFormatSpecs, getArgumentType, isFormatSpecCompatible, getArgsFromCall } from './format_checker';
-import { checkLibraryFunctionHeaders, extractIncludedHeaders } from './header_checker';
+import { createSegmentedTable, segSet, segGet, segAllNames } from '../utils/segmented_table';
+import { functionHeaderMap } from '../utils/function_header_map';
+import { getTypeRange, checkValueRange, extractNumericValue, checkAssignmentRange, checkInitializationRange } from '../detectors/range_checker';
+import { formatSpecCount, extractFormatSpecs, getArgumentType, isFormatSpecCompatible, getArgsFromCall } from '../detectors/format_checker';
+import { checkLibraryFunctionHeaders, extractIncludedHeaders } from '../detectors/header_checker';
 
 
 const typeKeywords = ['int','char','float','double','void','short','long','signed','unsigned','bool','size_t'];

@@ -1,6 +1,6 @@
 // 分段哈希表实现
 
-import { VariableInfo, SegmentedTable } from './types';
+import { VariableInfo, SegmentedTable } from '../interfaces/types';
 
 // Segmented hash tables (a-f, g-m, n-s, t-z)
 const SEGMENTS = 4;
@@ -28,6 +28,10 @@ export function segGet(table: SegmentedTable, name: string): VariableInfo | unde
 
 export function segAllNames(table: SegmentedTable): string[] {
   const out: string[] = [];
-  for (const seg of table) out.push(...Array.from(seg.keys()));
+  for (const seg of table) {
+    if (seg) {
+      out.push(...Array.from(seg.keys()));
+    }
+  }
   return out;
 }

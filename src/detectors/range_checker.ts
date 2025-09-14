@@ -1,6 +1,6 @@
 // 数值范围检查模块
 
-import { TypeRange, VariableInfo } from './types';
+import { TypeRange, VariableInfo } from '../interfaces/types';
 
 export function getTypeRange(typeName: string): TypeRange | null {
   const normalizedType = typeName.toLowerCase().replace(/\s+/g, ' ').trim();

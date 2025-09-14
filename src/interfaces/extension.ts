@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { analyzeWorkspaceCFiles } from './scanner';
+import { analyzeWorkspaceCFiles } from '../core/scanner';
 
 let diagnostics: vscode.DiagnosticCollection;
 

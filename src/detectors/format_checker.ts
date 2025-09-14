@@ -1,6 +1,6 @@
 // 格式字符串检查模块
 
-import { VariableInfo } from './types';
+import { VariableInfo } from '../interfaces/types';
 
 export function formatSpecCount(fmt: string): number {
   let cnt = 0;

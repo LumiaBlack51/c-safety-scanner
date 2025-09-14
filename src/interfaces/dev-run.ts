@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { analyzeWorkspaceCFiles } from './scanner';
+import { analyzeWorkspaceCFiles } from '../core/scanner';
 
 async function main() {
   const fake = {

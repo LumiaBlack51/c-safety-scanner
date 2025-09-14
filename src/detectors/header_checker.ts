@@ -1,6 +1,6 @@
 // 头文件检查模块
 
-import { functionHeaderMap } from './function_header_map';
+import { functionHeaderMap } from '../utils/function_header_map';
 
 // 检查库函数是否包含对应头文件
 export function checkLibraryFunctionHeaders(line: string, includedHeaders: Set<string>): string[] {

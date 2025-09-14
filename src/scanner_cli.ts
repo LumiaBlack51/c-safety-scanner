@@ -1,52 +1,18 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { Issue, VariableInfo, SegmentedTable, MemoryAllocation, LoopInfo, TypeRange } from './types';
+export { Issue };
+import { createSegmentedTable, segSet, segGet, segAllNames } from './segmented_table';
+import { functionHeaderMap } from './function_header_map';
+import { getTypeRange, checkValueRange, extractNumericValue, checkAssignmentRange, checkInitializationRange } from './range_checker';
+import { formatSpecCount, extractFormatSpecs, getArgumentType, isFormatSpecCompatible, getArgsFromCall } from './format_checker';
+import { checkLibraryFunctionHeaders, extractIncludedHeaders } from './header_checker';
 
-export type Issue = {
-  file: string;
-  line: number;
-  category: string;
-  message: string;
-  codeLine: string;
-};
-
-type VariableInfo = {
-  name: string;
-  typeName: string;
-  isPointer: boolean;
-  isInitialized: boolean;
-  isArray?: boolean;
-  pointerMaybeNull?: boolean;
-};
-
-// Segmented hash tables (a-f, g-m, n-s, t-z)
-const SEGMENTS = 4;
-function chooseSegment(name: string): number {
-  if (!name || name.length === 0) return 0;
-  const c = name[0].toLowerCase();
-  if (c < 'g') return 0;      // a-f
-  if (c < 'n') return 1;      // g-m
-  if (c < 't') return 2;      // n-s
-  return 3;                   // t-z
-}
-
-type SegmentedTable = Array<Map<string, VariableInfo>>;
-function createSegmentedTable(): SegmentedTable {
-  return new Array(SEGMENTS).fill(null).map(() => new Map<string, VariableInfo>());
-}
-function segSet(table: SegmentedTable, vi: VariableInfo) {
-  table[chooseSegment(vi.name)].set(vi.name, vi);
-}
-function segGet(table: SegmentedTable, name: string): VariableInfo | undefined {
-  return table[chooseSegment(name)].get(name);
-}
-function segAllNames(table: SegmentedTable): string[] {
-  const out: string[] = [];
-  for (const seg of table) out.push(...Array.from(seg.keys()));
-  return out;
-}
 
 const typeKeywords = ['int','char','float','double','void','short','long','signed','unsigned','bool','size_t'];
 const storageClassSpecifiers = ['static','const','extern','register','volatile','restrict'];
+
+
 
 function isLikelyDecl(line: string): boolean {
   if (!line.includes(';')) return false;
@@ -69,16 +35,33 @@ function parseDecl(line: string): Array<VariableInfo> {
   const semi = line.indexOf(';');
   const head = semi >= 0 ? line.slice(0, semi) : line;
   
-  // 支持存储类说明符的正则表达式
-  const m = head.match(/^\s*((?:static|const|extern|register|volatile|restrict)\s+)?([a-zA-Z_][\w\s\*]*?)\s+(.+)$/);
+  // 特殊处理struct声明
+  if (head.includes('struct ')) {
+    // 匹配 struct TypeName *varname = value 模式
+    const structMatch = head.match(/^\s*((?:static|const|extern|register|volatile|restrict)\s+)?struct\s+(\w+)\s+\*?([a-zA-Z_]\w*)\s*(=.*)?$/);
+    if (structMatch) {
+      const [, storageClass = '', structName, varName, initPart] = structMatch;
+      const fullType = `${storageClass}struct ${structName}`.trim();
+      const isPtr = head.includes('*');
+      const isInit = !!initPart;
+      result.push({ name: varName, typeName: fullType, isPointer: isPtr, isInitialized: isInit, isArray: false, pointerMaybeNull: false });
+      return result;
+    }
+  }
+  
+  // 支持存储类说明符和类型修饰符的正则表达式
+  const m = head.match(/^\s*((?:static|const|extern|register|volatile|restrict)\s+)?((?:unsigned|signed)\s+)?([a-zA-Z_][\w\s\*]*?)\s+(.+)$/);
   if (!m) return result;
   
   const storageClass = m[1] ? m[1].trim() : '';
-  const base = m[2].trim();
-  const decls = m[3];
+  const typeModifier = m[2] ? m[2].trim() : '';
+  const base = m[3].trim();
+  const decls = m[4];
   
   // 组合完整的类型名
-  const fullType = storageClass ? `${storageClass} ${base}` : base;
+  let fullType = base;
+  if (typeModifier) fullType = `${typeModifier} ${fullType}`;
+  if (storageClass) fullType = `${storageClass} ${fullType}`;
   
   for (const raw of decls.split(',')) {
     const it = raw.trim();
@@ -129,48 +112,14 @@ function markPointerInitKind(v: VariableInfo, line: string) {
   // function return assignment (e.g., p = create(...))
   if (/=\s*[A-Za-z_]\w*\s*\(/.test(line)) { v.isInitialized = true; v.pointerMaybeNull = false; return; }
 }
-function pointerDerefPatterns(name: string) { return [new RegExp(`\\*${name}\\b`), new RegExp(`${name}\\s*->`), new RegExp(`${name}\\s*\\[` )]; }
+function pointerDerefPatterns(name: string) { return [new RegExp(`\\*${name}\\s`), new RegExp(`${name}->`), new RegExp(`${name}\\s*\\[` )]; }
+function functionPointerPatterns(name: string) { return [new RegExp(`${name}\\s*\\(`)]; }
+function pointerAssignmentPatterns(name: string) { return [new RegExp(`\\w+\\s*=\\s*${name}\\b`)]; }
 
-function formatSpecCount(fmt: string) {
-  let cnt = 0;
-  for (let i = 0; i < fmt.length; i++) {
-    if (fmt[i] === '%') { if (fmt[i+1] === '%') { i++; continue; } cnt++; }
-  }
-  return cnt;
-}
-
-function getArgsFromCall(line: string) {
-  const lp = line.indexOf('(');
-  const rp = line.lastIndexOf(')');
-  if (lp < 0 || rp < 0 || rp <= lp) return [] as string[];
-  const inside = line.slice(lp + 1, rp);
-  const parts: string[] = [];
-  let depth = 0, buf = '', inStr = false, q = '';
-  for (let i = 0; i < inside.length; i++) {
-    const c = inside[i];
-    if (inStr) { buf += c; if (c === q) inStr = false; continue; }
-    if (c === '"' || c === '\'') { inStr = true; q = c; buf += c; continue; }
-    if (c === '(') { depth++; buf += c; continue; }
-    if (c === ')') { if (depth > 0) depth--; buf += c; continue; }
-    if (c === ',' && depth === 0) { parts.push(buf.trim()); buf = ''; continue; }
-    buf += c;
-  }
-  if (buf.trim()) parts.push(buf.trim());
-  return parts;
-}
 
 function getNameFromExpr(expr: string) { const m = expr.trim().replace(/^&/, '').match(/([a-zA-Z_][\w]*)/); return m ? m[1] : ''; }
 
 // 死循环检测相关函数
-interface LoopInfo {
-  type: 'for' | 'while' | 'do-while';
-  condition: string;
-  init?: string;
-  update?: string;
-  line: number;
-  hasBreak: boolean;
-  hasReturn: boolean;
-}
 
 function extractLoopInfo(line: string, lineNum: number): LoopInfo | null {
   const trimmed = line.trim();
@@ -339,107 +288,8 @@ function checkForBreakOrReturn(lines: string[], startLine: number, endLine: numb
   return { hasBreak, hasReturn };
 }
 
-// 数值范围检查相关函数
-interface TypeRange {
-  min: number;
-  max: number;
-  isSigned: boolean;
-}
-
-function getTypeRange(typeName: string): TypeRange | null {
-  const normalizedType = typeName.toLowerCase().replace(/\s+/g, ' ').trim();
-  
-  // 基本整数类型范围
-  const ranges: { [key: string]: TypeRange } = {
-    'char': { min: -128, max: 127, isSigned: true },
-    'unsigned char': { min: 0, max: 255, isSigned: false },
-    'signed char': { min: -128, max: 127, isSigned: true },
-    'short': { min: -32768, max: 32767, isSigned: true },
-    'short int': { min: -32768, max: 32767, isSigned: true },
-    'signed short': { min: -32768, max: 32767, isSigned: true },
-    'unsigned short': { min: 0, max: 65535, isSigned: false },
-    'unsigned short int': { min: 0, max: 65535, isSigned: false },
-    'int': { min: -2147483648, max: 2147483647, isSigned: true },
-    'signed int': { min: -2147483648, max: 2147483647, isSigned: true },
-    'unsigned int': { min: 0, max: 4294967295, isSigned: false },
-    'long': { min: -2147483648, max: 2147483647, isSigned: true },
-    'long int': { min: -2147483648, max: 2147483647, isSigned: true },
-    'signed long': { min: -2147483648, max: 2147483647, isSigned: true },
-    'unsigned long': { min: 0, max: 4294967295, isSigned: false },
-    'unsigned long int': { min: 0, max: 4294967295, isSigned: false },
-    'long long': { min: -9223372036854775808, max: 9223372036854775807, isSigned: true },
-    'long long int': { min: -9223372036854775808, max: 9223372036854775807, isSigned: true },
-    'signed long long': { min: -9223372036854775808, max: 9223372036854775807, isSigned: true },
-    'unsigned long long': { min: 0, max: 18446744073709551615, isSigned: false },
-    'unsigned long long int': { min: 0, max: 18446744073709551615, isSigned: false },
-    'size_t': { min: 0, max: 18446744073709551615, isSigned: false }
-  };
-  
-  return ranges[normalizedType] || null;
-}
-
-function checkValueRange(value: number, typeName: string): boolean {
-  const range = getTypeRange(typeName);
-  if (!range) return true; // 未知类型，不检查
-  
-  return value >= range.min && value <= range.max;
-}
-
-function extractNumericValue(expr: string): number | null {
-  // 移除空格
-  expr = expr.trim();
-  
-  // 处理十六进制
-  if (expr.startsWith('0x') || expr.startsWith('0X')) {
-    const hexValue = parseInt(expr, 16);
-    return isNaN(hexValue) ? null : hexValue;
-  }
-  
-  // 处理八进制
-  if (expr.startsWith('0') && expr.length > 1 && !expr.includes('.')) {
-    const octValue = parseInt(expr, 8);
-    return isNaN(octValue) ? null : octValue;
-  }
-  
-  // 处理十进制
-  const decValue = parseFloat(expr);
-  return isNaN(decValue) ? null : decValue;
-}
-
-function checkAssignmentRange(line: string, varInfo: VariableInfo): boolean {
-  // 查找赋值表达式（包括声明时的初始化）
-  const assignmentMatch = line.match(new RegExp(`${varInfo.name}\\s*=\\s*([^;]+)`));
-  if (!assignmentMatch) return true;
-  
-  const valueExpr = assignmentMatch[1].trim();
-  const value = extractNumericValue(valueExpr);
-  
-  if (value === null) return true; // 无法解析数值，跳过检查
-  
-  return checkValueRange(value, varInfo.typeName);
-}
-
-function checkInitializationRange(line: string, varInfo: VariableInfo): boolean {
-  // 检查声明时的初始化
-  const initMatch = line.match(new RegExp(`${varInfo.name}\\s*=\\s*([^;]+)`));
-  if (!initMatch) return true;
-  
-  const valueExpr = initMatch[1].trim();
-  const value = extractNumericValue(valueExpr);
-  
-  if (value === null) return true; // 无法解析数值，跳过检查
-  
-  return checkValueRange(value, varInfo.typeName);
-}
 
 // 内存泄漏检测相关函数
-interface MemoryAllocation {
-  line: number;
-  variable: string;
-  size: string;
-  isFreed: boolean;
-  reported: boolean; // 是否已经报告过
-}
 
 function detectMemoryAllocation(line: string, lineNum: number): MemoryAllocation | null {
   // 检测 malloc, calloc, realloc
@@ -534,6 +384,9 @@ export function analyzeCFile(filePath: string): { issues: Issue[]; globals: Segm
   const issues: Issue[] = [];
   const globals: SegmentedTable = createSegmentedTable();
   const localsByFunc: Map<string, SegmentedTable> = new Map();
+  
+  // 提取包含的头文件
+  const includedHeaders = extractIncludedHeaders(lines);
 
   // 预处理：头文件拼写与宏多行标记（逐行）
   let inDefine = false;
@@ -645,6 +498,11 @@ export function analyzeCFile(filePath: string): { issues: Issue[]; globals: Segm
       for (const d of decls) {
         const vi: VariableInfo = { name: d.name, typeName: d.typeName, isPointer: d.isPointer, isInitialized: (d as any).isInitialized || false } as VariableInfo;
         
+        // 设置指针类型标志
+        if (vi.isInitialized) {
+          markPointerInitKind(vi, line);
+        }
+        
         // 检查声明时的数值范围
         if (vi.isInitialized && !checkInitializationRange(line, vi)) {
           fallbackIssues.push({
@@ -691,18 +549,130 @@ export function analyzeCFile(filePath: string): { issues: Issue[]; globals: Segm
       hasMemoryAllocation = true; // 标记有内存分配
     }
     
+    // 库函数头文件检查
+    const headerWarnings = checkLibraryFunctionHeaders(line, includedHeaders);
+    for (const warning of headerWarnings) {
+      fallbackIssues.push({
+        file: filePath,
+        line: i + 1,
+        category: 'Header',
+        message: warning,
+        codeLine: raw
+      });
+    }
+    
+    // printf/scanf 格式字符串检查
+    if (/\b(printf|scanf)\s*\(/.test(line)) {
+      const isScanf = /\bscanf\s*\(/.test(line);
+      const args = getArgsFromCall(line);
+      if (args.length >= 1) {
+        const fmt = args[0];
+        const fmtStrMatch = fmt.match(/^[\s\(]*"([\s\S]*?)"[\s\)]*$/);
+        if (fmtStrMatch) {
+          const fmtStr = fmtStrMatch[1];
+          const specCount = formatSpecCount(fmtStr);
+          const provided = Math.max(0, args.length - 1);
+          
+          // 检查参数数量
+          if (provided < specCount) {
+            fallbackIssues.push({
+              file: filePath,
+              line: i + 1,
+              category: 'Format',
+              message: `${isScanf ? 'scanf' : 'printf'} 参数少于格式化占位数`,
+              codeLine: raw
+            });
+          }
+          if (provided > specCount) {
+            fallbackIssues.push({
+              file: filePath,
+              line: i + 1,
+              category: 'Format',
+              message: `${isScanf ? 'scanf' : 'printf'} 参数多于格式化占位数`,
+              codeLine: raw
+            });
+          }
+          
+          // 检查格式字符串与参数类型匹配
+          const formatSpecs = extractFormatSpecs(fmtStr);
+          for (let j = 0; j < Math.min(formatSpecs.length, provided); j++) {
+            const spec = formatSpecs[j];
+            const arg = args[j + 1];
+            const argType = getArgumentType(arg, allNames, getVarFB);
+            
+            if (argType && !isFormatSpecCompatible(spec, argType)) {
+              fallbackIssues.push({
+                file: filePath,
+                line: i + 1,
+                category: 'Format',
+                message: `格式字符串不匹配：${spec} 与 ${argType} 类型不兼容`,
+                codeLine: raw
+              });
+            }
+          }
+          
+          // scanf 地址检查
+          if (isScanf) {
+            for (let ai = 1; ai < args.length; ai++) {
+              const expr = args[ai];
+              const name = getNameFromExpr(expr);
+              if (!name) continue;
+              if (!expr.trim().startsWith('&')) {
+                const v = getVarFB(name);
+                if (!(v && v.typeName === 'char')) { // char 数组可不加 &
+                  fallbackIssues.push({
+                    file: filePath,
+                    line: i + 1,
+                    category: 'Format',
+                    message: 'scanf 实参建议传地址（使用 &var）',
+                    codeLine: raw
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
     // 内存释放检测
     detectMemoryFree(line, memoryAllocations);
     for (const name of allNames) {
       if (!tokenContains(line, name)) continue;
       const v = getVarFB(name);
       if (!v) continue;
-      if (!v.isInitialized) {
+      // 检查未初始化的变量和空指针
+      if (!v.isInitialized || (v.isInitialized && v.pointerMaybeNull)) {
         const derefHitAny = v.isPointer && pointerDerefPatterns(name).some(r => r.test(line));
+        const funcPtrHitAny = v.isPointer && functionPointerPatterns(name).some(r => r.test(line));
+        const assignHitAny = v.isPointer && pointerAssignmentPatterns(name).some(r => r.test(line));
         const indexOnly = (v as any).isArray && new RegExp(`${name}\\s*\\[`).test(line) && !new RegExp(`\\*${name}\\b|${name}\\s*->`).test(line);
         const derefHit = derefHitAny && !indexOnly;
-        if (derefHit) fallbackIssues.push({ file: filePath, line: i + 1, category: 'Wild pointer', message: '潜在野指针解引用（指针未初始化）', codeLine: raw });
-        else fallbackIssues.push({ file: filePath, line: i + 1, category: 'Uninitialized', message: '变量使用前未初始化', codeLine: raw });
+        const funcPtrHit = funcPtrHitAny && !indexOnly;
+        const assignHit = assignHitAny && !indexOnly;
+        
+        if (derefHit || funcPtrHit || assignHit) {
+          // 区分野指针和空指针
+          if (v.pointerMaybeNull) {
+            if (funcPtrHit) {
+              fallbackIssues.push({ file: filePath, line: i + 1, category: 'Null pointer', message: '潜在空函数指针调用（指针为NULL）', codeLine: raw });
+            } else if (assignHit) {
+              fallbackIssues.push({ file: filePath, line: i + 1, category: 'Null pointer', message: '潜在空指针赋值（指针为NULL）', codeLine: raw });
+            } else {
+              fallbackIssues.push({ file: filePath, line: i + 1, category: 'Null pointer', message: '潜在空指针解引用（指针为NULL）', codeLine: raw });
+            }
+          } else {
+            if (funcPtrHit) {
+              fallbackIssues.push({ file: filePath, line: i + 1, category: 'Wild pointer', message: '潜在野函数指针调用（指针未初始化）', codeLine: raw });
+            } else if (assignHit) {
+              fallbackIssues.push({ file: filePath, line: i + 1, category: 'Wild pointer', message: '潜在野指针赋值（指针未初始化）', codeLine: raw });
+            } else {
+              fallbackIssues.push({ file: filePath, line: i + 1, category: 'Wild pointer', message: '潜在野指针解引用（指针未初始化）', codeLine: raw });
+            }
+          }
+        } else if (!v.isInitialized) {
+          fallbackIssues.push({ file: filePath, line: i + 1, category: 'Uninitialized', message: '变量使用前未初始化', codeLine: raw });
+        }
       }
     }
   }

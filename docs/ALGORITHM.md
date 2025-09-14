@@ -274,36 +274,232 @@ function manageScope():
 - 缓存当前作用域的变量表
 - 避免重复查找
 
+### 6. 内存泄漏检测
+
+**算法**: 跟踪内存分配和释放
+
+```pseudocode
+function detectMemoryAllocation(line, lineNum):
+  // 检测 malloc, calloc, realloc
+  if match = line.match("([a-zA-Z_]\\w*)\\s*=\\s*(?:\\()?\\s*(malloc|calloc|realloc)\\s*\\("):
+    varName = match[1]
+    allocType = match[2]
+    size = extractSize(line)
+    return {line: lineNum, variable: varName, size: size, isFreed: false, reported: false}
+
+function detectMemoryFree(line, allocations):
+  // 检测 free 调用
+  if match = line.match("free\\s*\\(\\s*([a-zA-Z_]\\w*)\\s*\\)"):
+    varName = match[1]
+    for alloc in allocations:
+      if alloc.variable == varName and not alloc.isFreed:
+        alloc.isFreed = true
+        break
+
+function checkMemoryLeaks(allocations):
+  for alloc in allocations:
+    if not alloc.isFreed and not alloc.reported:
+      reportError("内存泄漏：变量" + alloc.variable + "分配的内存未释放")
+      alloc.reported = true
+```
+
+**检测规则**:
+- 跟踪所有 `malloc`, `calloc`, `realloc` 调用
+- 检测对应的 `free` 调用
+- 在函数结束时检查未释放的内存
+- 支持变量重赋值的情况
+
+### 7. printf/scanf 格式字符串检查
+
+**算法**: 检查格式说明符与参数类型匹配
+
+```pseudocode
+function checkFormatString(line):
+  if matches(line, "\\b(printf|scanf)\\s*\\("):
+    args = getArgsFromCall(line)
+    if args.length >= 1:
+      fmt = args[0]
+      fmtStr = extractFormatString(fmt)
+      specCount = countFormatSpecifiers(fmtStr)
+      provided = max(0, args.length - 1)
+      
+      // 检查参数数量
+      if provided < specCount:
+        reportError("参数少于格式化占位数")
+      if provided > specCount:
+        reportError("参数多于格式化占位数")
+      
+      // 检查类型匹配
+      for i = 0 to min(specCount, provided):
+        spec = extractFormatSpec(fmtStr, i)
+        argType = getArgumentType(args[i + 1])
+        if not isFormatSpecCompatible(spec, argType):
+          reportError("格式字符串不匹配：" + spec + " 与 " + argType + " 类型不兼容")
+
+function isFormatSpecCompatible(spec, argType):
+  specType = spec.toLowerCase()
+  
+  // 整数类型
+  if specType in ["%d", "%i", "%o", "%u", "%x", "%x"]:
+    return argType in ["int", "char", "short", "long", "unsigned", "signed"]
+  
+  // 浮点类型
+  if specType in ["%f", "%e", "%e", "%g", "%g", "%a", "%a"]:
+    return argType in ["float", "double"]
+  
+  // 字符类型
+  if specType == "%c":
+    return "char" in argType and "*" not in argType
+  
+  // 字符串类型
+  if specType == "%s":
+    return "char" in argType and "*" in argType
+  
+  // 指针类型
+  if specType == "%p":
+    return "*" in argType
+  
+  return true  // 默认兼容，避免误报
+```
+
+### 8. 数值范围检查
+
+**算法**: 检查数值是否超出类型范围
+
+```pseudocode
+function checkValueRange(value, typeName):
+  range = getTypeRange(typeName)
+  if not range: return true  // 未知类型，不检查
+  
+  return value >= range.min and value <= range.max
+
+function getTypeRange(typeName):
+  ranges = {
+    'char': {min: -128, max: 127, isSigned: true},
+    'unsigned char': {min: 0, max: 255, isSigned: false},
+    'short': {min: -32768, max: 32767, isSigned: true},
+    'unsigned short': {min: 0, max: 65535, isSigned: false},
+    'int': {min: -2147483648, max: 2147483647, isSigned: true},
+    'unsigned int': {min: 0, max: 4294967295, isSigned: false},
+    'long': {min: -2147483648, max: 2147483647, isSigned: true},
+    'unsigned long': {min: 0, max: 4294967295, isSigned: false},
+    'long long': {min: -9223372036854775808, max: 9223372036854775807, isSigned: true},
+    'unsigned long long': {min: 0, max: 18446744073709551615, isSigned: false}
+  }
+  return ranges[normalizeType(typeName)]
+
+function extractNumericValue(expr):
+  expr = expr.trim()
+  
+  // 处理十六进制
+  if expr.startsWith("0x") or expr.startsWith("0X"):
+    return parseInt(expr, 16)
+  
+  // 处理八进制
+  if expr.startsWith("0") and expr.length > 1 and not expr.includes("."):
+    return parseInt(expr, 8)
+  
+  // 处理十进制
+  return parseFloat(expr)
+```
+
+**支持的类型**:
+- 所有基本整数类型及其 unsigned 变体
+- 十六进制数值 (0x...)
+- 八进制数值 (0...)
+- 十进制数值
+
+### 9. 库函数头文件检查
+
+**算法**: 检查使用的库函数是否包含对应头文件
+
+```pseudocode
+function checkLibraryFunctionHeaders(line, includedHeaders):
+  functionCalls = extractFunctionCalls(line)
+  warnings = []
+  
+  for call in functionCalls:
+    functionName = extractFunctionName(call)
+    requiredHeader = functionHeaderMap[functionName]
+    
+    if requiredHeader and requiredHeader not in includedHeaders:
+      warnings.add("函数 " + functionName + " 需要包含头文件 " + requiredHeader)
+  
+  return warnings
+
+function extractIncludedHeaders(lines):
+  headers = Set()
+  for line in lines:
+    if match = line.match("#\\s*include\\s*[<\"]([^>\"]+)[>\"]"):
+      headers.add(match[1])
+  return headers
+```
+
+**支持的库函数**:
+- **stdio.h**: printf, scanf, fopen, fclose, fgets, fputs 等
+- **stdlib.h**: malloc, free, exit, atoi, rand 等
+- **string.h**: strcpy, strlen, strcmp, memcpy 等
+- **math.h**: sin, cos, sqrt, pow 等
+- **ctype.h**: isalpha, isdigit, toupper 等
+- **time.h**: time, clock, localtime 等
+- **assert.h**: assert
+- **errno.h**: perror
+- **limits.h**: INT_MAX, INT_MIN 等常量
+
+## 模块化架构
+
+### 1. 文件结构
+
+```
+src/
+├── types.ts              # 类型定义
+├── segmented_table.ts    # 分段哈希表实现
+├── function_header_map.ts # 库函数头文件映射
+├── range_checker.ts      # 数值范围检查
+├── format_checker.ts     # 格式字符串检查
+├── header_checker.ts     # 头文件检查
+└── scanner_cli.ts        # 主扫描器逻辑
+```
+
+### 2. 模块职责
+
+- **types.ts**: 定义所有接口和类型
+- **segmented_table.ts**: 分段哈希表的实现和操作
+- **function_header_map.ts**: 库函数与头文件的映射关系
+- **range_checker.ts**: 数值范围检查和类型范围定义
+- **format_checker.ts**: printf/scanf 格式字符串检查
+- **header_checker.ts**: 库函数头文件依赖检查
+- **scanner_cli.ts**: 主扫描逻辑，协调各模块
+
 ## 当前限制
 
-### 1. 未实现的检测
-- **内存泄漏检测**: malloc/free 配对检查
-- **printf/scanf格式检查**: 参数类型和数量匹配
-- **函数返回值检查**: 未检查函数调用的返回值
-
-### 2. 误报原因
-- 按址传递参数的复杂场景识别不完整
-- 函数调用返回值的使用场景
+### 1. 误报原因
+- 函数参数和递归调用的处理不够智能
 - 复杂表达式的变量使用检测
+- 按址传递参数的复杂场景识别不完整
 
-### 3. 漏报原因
-- 仅在使用时检测，不在声明时检测
+### 2. 漏报原因
 - 缺少高级控制流分析
 - 缺少跨函数的数据流分析
+- 复杂指针运算的检测
+
+### 3. 性能限制
+- 基于行级分析，缺少全局数据流分析
+- 正则表达式解析的局限性
+- 缺少抽象语法树支持
 
 ## 性能指标
 
 当前版本性能指标:
-- **Precision**: 61.1%
-- **Recall**: 50%
-- **F1**: 55%
-- **总检测**: 18个问题
-- **预置BUG**: 22个
+- **Bug组检测**: 能够检测到大部分预置的bug
+- **Correct组误报**: 在复杂代码中存在一定误报
+- **检测类型**: 支持9种主要检测类型
+- **模块化程度**: 高度模块化，易于维护和扩展
 
 ## 改进方向
 
-1. **内存泄漏检测**: 实现 malloc/free 配对检查
-2. **格式字符串检查**: 实现 printf/scanf 参数匹配
-3. **函数返回值检查**: 检查函数调用的返回值使用
-4. **改进按址传递识别**: 减少函数调用相关的误报
-5. **增强死循环检测**: 支持更复杂的循环条件和嵌套循环分析
+1. **智能函数参数处理**: 改进函数调用和递归的检测逻辑
+2. **抽象语法树支持**: 集成AST分析提高准确性
+3. **数据流分析**: 实现跨函数的数据流跟踪
+4. **配置化检测**: 允许用户配置检测规则和阈值
+5. **性能优化**: 优化大文件的处理性能

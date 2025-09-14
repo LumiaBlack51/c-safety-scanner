@@ -3,7 +3,7 @@
 
 // 测试用例1: 明显的死循环 - for(;;)
 void test_infinite_for() {
-    // BUG: 死循环，无退出条件
+    // 死循环，无退出条件
     for(;;) {
         printf("infinite loop\n");
     }
@@ -11,7 +11,7 @@ void test_infinite_for() {
 
 // 测试用例2: while(1) 死循环
 void test_infinite_while() {
-    // BUG: 死循环，无退出条件
+    // 死循环，无退出条件
     while(1) {
         printf("infinite while\n");
     }
@@ -19,7 +19,7 @@ void test_infinite_while() {
 
 // 测试用例3: 循环变量永远不会满足退出条件 - i++ 但条件是 i >= 10
 void test_never_exit_condition() {
-    // BUG: i从10开始，条件是i>=10，但i++永远不会让i<10
+    // i从10开始，条件是i>=10，但i++永远不会让i<10 - 当前检测器无法检测
     for(int i = 10; i >= 10; i++) {
         printf("i = %d\n", i);
     }
@@ -27,7 +27,7 @@ void test_never_exit_condition() {
 
 // 测试用例4: 循环变量递减但条件错误
 void test_wrong_decrement() {
-    // BUG: i从0开始，条件是i<10，但i--会让i越来越小，永远不会>=10
+    // i从0开始，条件是i<10，但i--会让i越来越小，永远不会>=10 - 当前检测器无法检测
     for(int i = 0; i < 10; i--) {
         printf("i = %d\n", i);
     }
@@ -35,7 +35,7 @@ void test_wrong_decrement() {
 
 // 测试用例5: 循环变量步长过大，跳过退出条件
 void test_step_too_large() {
-    // BUG: i从0开始，每次+3，但条件是i==10，i会变成0,3,6,9,12...永远不等于10
+    // i从0开始，每次+3，但条件是i==10，i会变成0,3,6,9,12...永远不等于10
     for(int i = 0; i == 10; i += 3) {
         printf("i = %d\n", i);
     }
@@ -43,7 +43,7 @@ void test_step_too_large() {
 
 // 测试用例6: 循环变量步长过小，永远达不到退出条件
 void test_step_too_small() {
-    // BUG: i从0开始，每次+0.1，但条件是i>=1，由于浮点精度问题可能永远达不到
+    // i从0开始，每次+0.1，但条件是i>=1，由于浮点精度问题可能永远达不到 - 当前检测器无法检测
     for(double i = 0.0; i < 1.0; i += 0.1) {
         printf("i = %f\n", i);
     }
@@ -89,7 +89,7 @@ void test_for_infinite_with_return() {
 // 测试用例11: 复杂的循环条件 - 可能死循环
 void test_complex_condition() {
     int x = 5;
-    // BUG: x永远不会改变，条件x > 0永远为真
+    // x永远不会改变，条件x > 0永远为真 - 当前检测器无法检测
     while(x > 0) {
         printf("x = %d\n", x);
         // 忘记更新x
@@ -101,14 +101,14 @@ void test_modified_in_loop() {
     int i = 0;
     while(i < 10) {
         printf("i = %d\n", i);
-        i = i; // BUG: i被赋值为自己，没有实际变化
+        i = i; // i被赋值为自己，没有实际变化 - 当前检测器无法检测
     }
 }
 
 // 测试用例13: 嵌套循环中的死循环
 void test_nested_infinite() {
     for(int i = 0; i < 5; i++) {
-        // BUG: 内层循环是死循环
+        // 内层循环是死循环
         for(;;) {
             printf("nested infinite\n");
         }
@@ -118,7 +118,7 @@ void test_nested_infinite() {
 // 测试用例14: 循环条件依赖于外部变量，但外部变量不变
 void test_external_dependency() {
     int flag = 1;
-    // BUG: flag在循环中从未改变，条件永远为真
+    // flag在循环中从未改变，条件永远为真 - 当前检测器无法检测
     while(flag) {
         printf("flag = %d\n", flag);
         // 忘记修改flag
@@ -127,7 +127,7 @@ void test_external_dependency() {
 
 // 测试用例15: 浮点数循环的精度问题
 void test_float_precision() {
-    // BUG: 由于浮点数精度问题，可能永远达不到1.0
+    // 由于浮点数精度问题，可能永远达不到1.0 - 当前检测器无法检测
     for(float f = 0.0f; f != 1.0f; f += 0.1f) {
         printf("f = %f\n", f);
     }

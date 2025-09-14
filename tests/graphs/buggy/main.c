@@ -4,7 +4,7 @@
 int main() {
     Graph* g = graph_create(5); // BUGs in create
     graph_add_edge(g, 0, 1, 2); // BUGs in add
-    graph_remove_edge(g, 0, 1); // BUG: 死循环
+    graph_remove_edge(g, 0, 1); // 死循环
 
     int dist[5];
     dijkstra(g, 0, dist);

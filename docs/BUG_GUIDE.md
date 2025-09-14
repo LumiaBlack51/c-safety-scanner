@@ -63,3 +63,166 @@
 - tests\graphs\buggy\bug_49.c:13 [Uninitialized] 2nd function call argument is an uninitialized value - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
 - tests\graphs\buggy\bug_50.c:26 [Wild pointer] Dereference of null pointer (loaded from variable 'static_ptr') - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
 - tests\graphs\buggy\graph.c:53 [Format] format specifies type 'char *' but the argument has type 'int' - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-13T14:02:32.591Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:9 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:12 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:15 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:33 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:84 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:85 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:88 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:89 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:95 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:96 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:22 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:22 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:26 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:7 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:23 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:24 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:10 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:13 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:21 [Wild pointer] Dereference of null pointer (loaded from variable 'ptr2') - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:36 [Format] Call to function 'scanf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'scanf_s' in case of C11 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:36 [Format] 'scanf' is deprecated: This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:42 [Wild pointer] Dereference of null pointer (loaded from variable 'ptr4') - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:45 [Format] Call to function 'scanf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'scanf_s' in case of C11 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:45 [Format] 'scanf' is deprecated: This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:69 [Uninitialized] Assigned value is uninitialized - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:110 [Uninitialized] Called function pointer is an uninitialized pointer value - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:13 [Uninitialized] 2nd function call argument is an uninitialized value - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:26 [Wild pointer] Dereference of null pointer (loaded from variable 'static_ptr') - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:53 [Format] format specifies type 'char *' but the argument has type 'int' - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-13T14:02:37.385Z) - tests\graphs\correct
+- tests\graphs\correct\main.c:15 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:18 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\correct\main.c:20 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\correct\main.c:22 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\correct\main.c:39 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+
+### 识别结果快照 (2025-09-13T14:10:59.421Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:9 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:12 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:15 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:33 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:84 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:85 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:88 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:89 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:95 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:96 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:22 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:22 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:26 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:7 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:23 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:24 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:10 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:13 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:21 [Wild pointer] Dereference of null pointer (loaded from variable 'ptr2') - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:36 [Format] Call to function 'scanf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'scanf_s' in case of C11 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:36 [Format] 'scanf' is deprecated: This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:42 [Wild pointer] Dereference of null pointer (loaded from variable 'ptr4') - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:45 [Format] Call to function 'scanf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'scanf_s' in case of C11 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:45 [Format] 'scanf' is deprecated: This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:69 [Uninitialized] Assigned value is uninitialized - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:110 [Uninitialized] Called function pointer is an uninitialized pointer value - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:13 [Uninitialized] 2nd function call argument is an uninitialized value - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:26 [Wild pointer] Dereference of null pointer (loaded from variable 'static_ptr') - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:53 [Format] format specifies type 'char *' but the argument has type 'int' - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-14T04:30:21.927Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:9 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:12 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:15 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:33 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:84 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:85 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:88 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:89 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:95 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:96 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:22 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:22 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:26 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:7 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:23 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:24 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:10 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:13 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:21 [Wild pointer] Dereference of null pointer (loaded from variable 'ptr2') - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:36 [Format] Call to function 'scanf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'scanf_s' in case of C11 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:36 [Format] 'scanf' is deprecated: This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:42 [Wild pointer] Dereference of null pointer (loaded from variable 'ptr4') - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:45 [Format] Call to function 'scanf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'scanf_s' in case of C11 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:45 [Format] 'scanf' is deprecated: This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:69 [Uninitialized] Assigned value is uninitialized - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:110 [Uninitialized] Called function pointer is an uninitialized pointer value - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:13 [Uninitialized] 2nd function call argument is an uninitialized value - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:26 [Wild pointer] Dereference of null pointer (loaded from variable 'static_ptr') - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:53 [Format] format specifies type 'char *' but the argument has type 'int' - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+
+### 识别结果快照 (2025-09-14T04:45:41.997Z) - tests\graphs\buggy
+- tests\graphs\buggy\bug_0.c:1 [Header] 可疑标准头文件: stdiox.h - 建议: 改为正确的标准头文件名，或私有头使用双引号 include
+- tests\graphs\buggy\bug_0.c:5 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:6 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:7 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_0.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:9 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:12 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:15 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:33 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:84 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:85 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:88 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:89 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:95 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:96 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_49.c:22 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:22 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:26 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:7 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:8 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:23 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:24 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\graph.c:36 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:10 [Uninitialized] 变量使用前未初始化 - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\main.c:13 [Wild pointer] 潜在野指针解引用（指针未初始化） - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:21 [Wild pointer] Dereference of null pointer (loaded from variable 'ptr2') - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:36 [Format] Call to function 'scanf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'scanf_s' in case of C11 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:36 [Format] 'scanf' is deprecated: This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:42 [Wild pointer] Dereference of null pointer (loaded from variable 'ptr4') - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\bug_45.c:45 [Format] Call to function 'scanf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'scanf_s' in case of C11 - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:45 [Format] 'scanf' is deprecated: This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*
+- tests\graphs\buggy\bug_45.c:69 [Uninitialized] Assigned value is uninitialized - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_45.c:110 [Uninitialized] Called function pointer is an uninitialized pointer value - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_49.c:13 [Uninitialized] 2nd function call argument is an uninitialized value - 建议: 在首次使用前显式赋值，或按址传递让被写入后再使用
+- tests\graphs\buggy\bug_50.c:26 [Wild pointer] Dereference of null pointer (loaded from variable 'static_ptr') - 建议: 为指针分配/指向有效内存或置 NULL 并在解引用前检查
+- tests\graphs\buggy\graph.c:53 [Format] format specifies type 'char *' but the argument has type 'int' - 建议: 参数个数与占位匹配，scanf 对非字符串加 &，%s 对应 char*

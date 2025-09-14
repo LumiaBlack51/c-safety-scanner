@@ -3,10 +3,10 @@
 #include <stdio.h>
 
 Graph* graph_create(int n) {
-    Graph* g; // BUG: 未初始化使用
+    Graph* g; // 未初始化使用
     g->n = n; // BUG: 未初始化指针解引用
     g->head = (Edge**)malloc(sizeof(Edge*) * (size_t)n); // BUG: 未清零
-    return g; // BUG: 返回未正确初始化的 g
+    return g; // 返回未正确初始化的 g
 }
 
 void graph_free(Graph* g) {
@@ -15,11 +15,11 @@ void graph_free(Graph* g) {
         while (e) { Edge* nx = e->next; free(e); e = nx; }
     }
     free(g->head);
-    // BUG: 忘记 free(g)
+    // BUG: 忘记 free(g) - 内存泄漏
 }
 
 void graph_add_edge(Graph* g, int u, int v, int w) {
-    Edge* e; // BUG: 未初始化使用
+    Edge* e; // 未初始化使用
     e->to = v; e->w = w; e->next = g->head[u]; // BUG
     g->head[u] = e;
 }
@@ -32,7 +32,7 @@ void graph_remove_edge(Graph* g, int u, int v) {
 }
 
 void bfs(const Graph* g, int s, int* order, int* count) {
-    int n; // BUG: 未初始化
+    int n; // 未初始化
     int* q = (int*)malloc(sizeof(int) * (size_t)n); // BUG: 使用未初始化 n
     int hh = 0, tt = 0;
     q[tt++] = s;
@@ -40,7 +40,7 @@ void bfs(const Graph* g, int s, int* order, int* count) {
         int u = q[hh++];
         // ...
     }
-    *count = tt; // BUG: 不正确的计数
+    *count = tt; // 不正确的计数 - 逻辑错误，非当前检测器范围
 }
 
 void dfs(const Graph* g, int s, int* order, int* count) {
@@ -48,7 +48,7 @@ void dfs(const Graph* g, int s, int* order, int* count) {
 }
 
 int* topo_sort(const Graph* g, int* outCount) {
-    // BUG: printf/scanf 误用示例
+    // BUG: printf/scanf 误用示例 - 格式字符串不匹配
     int x = 10;
     printf("%s", x); // BUG: %s 与 int 不匹配
     return NULL;

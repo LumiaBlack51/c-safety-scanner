@@ -411,7 +411,9 @@ export function analyzeCFile(filePath: string): { issues: Issue[]; globals: Segm
   // 启发式解析方法
   const fallbackIssues: Issue[] = [];
   let braceDepth = 0;
+  let inTypedefBlock = false; // 处于 typedef 块（例如 typedef struct {...} Name;）
   const funcStack: string[] = [];
+  const knownFunctionNames: Set<string> = new Set();
   const localsByFuncFB: Map<string, SegmentedTable> = new Map();
   const memoryAllocations: MemoryAllocation[] = [];
   let hasMemoryAllocation = false; // 是否有内存分配
@@ -440,6 +442,29 @@ export function analyzeCFile(filePath: string): { issues: Issue[]; globals: Segm
     if (!line) continue;
     if (line.startsWith('#')) continue;
     if (/\/\//.test(line)) line = line.split('//')[0];
+
+    // 跳过 typedef 行与 typedef 收尾行，例如："typedef struct Foo {"、"} Foo;"、"typedef int Size;"
+    if (/^\s*typedef\b/.test(line)) {
+      // 进入 typedef 块（若行内出现 '{' 且未闭合）
+      if (line.includes('{') && !line.includes(';')) inTypedefBlock = true;
+      continue;
+    }
+    if (/^\s*}\s*[A-Za-z_]\w*\s*;\s*$/.test(line)) { inTypedefBlock = false; continue; }
+    if (inTypedefBlock) {
+      // typedef 块内部的内容全部跳过（避免把类型名或成员名当变量用）
+      if (line.includes('}')) inTypedefBlock = false; // 容错：遇到 '}' 后等待收尾行匹配
+      continue;
+    }
+
+    // 记录函数原型（以 ; 结尾），避免将函数名当变量
+    try {
+      if (/(^|\s)[A-Za-z_]\w*\s*\([^;]*\)\s*;\s*$/.test(line) && !/\b(if|for|while|switch|return)\b/.test(line)) {
+        const head = line.split('(')[0];
+        const tokens = head.trim().split(/\s+/);
+        const cand = tokens[tokens.length - 1];
+        if (/^[A-Za-z_]\w*$/.test(cand)) knownFunctionNames.add(cand);
+      }
+    } catch {}
     
     for (const ch of raw) {
       if (ch === '{') { braceDepth++; }
@@ -470,7 +495,45 @@ export function analyzeCFile(filePath: string): { issues: Issue[]; globals: Segm
         }
       }
     }
-    const fn = extractFunctionName(raw); if (fn) funcStack.push(fn);
+    const fn = extractFunctionName(raw);
+    if (fn) {
+      funcStack.push(fn);
+      knownFunctionNames.add(fn);
+      // 解析函数形参并将其标记为已初始化的局部变量
+      try {
+        const lp = raw.indexOf('(');
+        const rp = raw.lastIndexOf(')');
+        if (lp >= 0 && rp > lp) {
+          const paramsRaw = raw.slice(lp + 1, rp).trim();
+          if (paramsRaw && paramsRaw !== 'void') {
+            const params = paramsRaw.split(',');
+            const loc = currentLocals();
+            for (const p of params) {
+              const token = p.trim();
+              if (!token) continue;
+              // 获取变量名（最后一个标识符）
+              const nameMatch = token.match(/([a-zA-Z_]\w*)\s*$/);
+              if (!nameMatch) continue;
+              const name = nameMatch[1];
+              // 判断是否为指针
+              const isPtr = /\*/.test(token);
+              // 基础类型名（去掉变量名本身）
+              const typePart = token.replace(new RegExp(`([\*\s])?${name}\s*$`), '').trim();
+              const typeName = typePart.replace(/\s+/g, ' ').replace(/\*+/g, '').trim() || 'int';
+              const vi: VariableInfo = {
+                name,
+                typeName,
+                isPointer: isPtr,
+                isInitialized: true,
+                isArray: false,
+                pointerMaybeNull: false
+              };
+              if (loc) segSet(loc, vi);
+            }
+          }
+        }
+      } catch {}
+    }
     
     // 死循环检测
     const loopInfo = extractLoopInfo(line, i + 1);
@@ -521,15 +584,27 @@ export function analyzeCFile(filePath: string): { issues: Issue[]; globals: Segm
     }
     
     const allNames = new Set<string>([...segAllNames(globals), ...Array.from(localsByFuncFB.values()).flatMap(tab => segAllNames(tab))]);
+
+    // 去除字符串字面量，减少误匹配
+    const lineNoStr = line.replace(/"(?:\\.|[^"\\])*"/g, '""');
+
+    // 函数签名或原型行：跳过变量赋值与使用检测
+    const isFuncSigOrProto = ((): boolean => {
+      if (/\{\s*$/.test(raw) && extractFunctionName(raw)) return true;
+      if (/(^|\s)[A-Za-z_]\w*\s*\([^;]*\)\s*;\s*$/.test(line) && !/\b(if|for|while|switch)\b/.test(line)) return true;
+      return false;
+    })();
+
     for (const name of allNames) {
-      if (tokenContains(line, name) && looksDirectAssignmentTo(line, name)) {
+      if (isFuncSigOrProto) break;
+      if (tokenContains(lineNoStr, name) && looksDirectAssignmentTo(lineNoStr, name)) {
         const v = getVarFB(name);
         if (v) { 
           v.isInitialized = true; 
-          markPointerInitKind(v, line);
+          markPointerInitKind(v, lineNoStr);
           
           // 数值范围检查
-          if (!checkAssignmentRange(line, v)) {
+          if (!checkAssignmentRange(lineNoStr, v)) {
             fallbackIssues.push({
               file: filePath,
               line: i + 1,
@@ -543,14 +618,14 @@ export function analyzeCFile(filePath: string): { issues: Issue[]; globals: Segm
     }
     
     // 内存分配检测
-    const allocation = detectMemoryAllocation(line, i + 1);
+    const allocation = detectMemoryAllocation(lineNoStr, i + 1);
     if (allocation) {
       memoryAllocations.push(allocation);
       hasMemoryAllocation = true; // 标记有内存分配
     }
     
     // 库函数头文件检查
-    const headerWarnings = checkLibraryFunctionHeaders(line, includedHeaders);
+    const headerWarnings = checkLibraryFunctionHeaders(lineNoStr, includedHeaders);
     for (const warning of headerWarnings) {
       fallbackIssues.push({
         file: filePath,
@@ -562,9 +637,9 @@ export function analyzeCFile(filePath: string): { issues: Issue[]; globals: Segm
     }
     
     // printf/scanf 格式字符串检查
-    if (/\b(printf|scanf)\s*\(/.test(line)) {
-      const isScanf = /\bscanf\s*\(/.test(line);
-      const args = getArgsFromCall(line);
+    if (/\b(printf|scanf)\s*\(/.test(lineNoStr)) {
+      const isScanf = /\bscanf\s*\(/.test(lineNoStr);
+      const args = getArgsFromCall(lineNoStr);
       if (args.length >= 1) {
         const fmt = args[0];
         const fmtStrMatch = fmt.match(/^[\s\(]*"([\s\S]*?)"[\s\)]*$/);
@@ -636,17 +711,20 @@ export function analyzeCFile(filePath: string): { issues: Issue[]; globals: Segm
     }
     
     // 内存释放检测
-    detectMemoryFree(line, memoryAllocations);
+    detectMemoryFree(lineNoStr, memoryAllocations);
     for (const name of allNames) {
-      if (!tokenContains(line, name)) continue;
+      if (isFuncSigOrProto) break;
+      if (!tokenContains(lineNoStr, name)) continue;
       const v = getVarFB(name);
       if (!v) continue;
+      // 函数名或调用：跳过
+      if (new RegExp(`${name}\\s*\\(`).test(lineNoStr) || knownFunctionNames.has(name)) continue;
       // 检查未初始化的变量和空指针
       if (!v.isInitialized || (v.isInitialized && v.pointerMaybeNull)) {
-        const derefHitAny = v.isPointer && pointerDerefPatterns(name).some(r => r.test(line));
-        const funcPtrHitAny = v.isPointer && functionPointerPatterns(name).some(r => r.test(line));
-        const assignHitAny = v.isPointer && pointerAssignmentPatterns(name).some(r => r.test(line));
-        const indexOnly = (v as any).isArray && new RegExp(`${name}\\s*\\[`).test(line) && !new RegExp(`\\*${name}\\b|${name}\\s*->`).test(line);
+        const derefHitAny = v.isPointer && pointerDerefPatterns(name).some(r => r.test(lineNoStr));
+        const funcPtrHitAny = v.isPointer && functionPointerPatterns(name).some(r => r.test(lineNoStr));
+        const assignHitAny = v.isPointer && pointerAssignmentPatterns(name).some(r => r.test(lineNoStr));
+        const indexOnly = (v as any).isArray && new RegExp(`${name}\\s*\\[`).test(lineNoStr) && !new RegExp(`\\*${name}\\b|${name}\\s*->`).test(lineNoStr);
         const derefHit = derefHitAny && !indexOnly;
         const funcPtrHit = funcPtrHitAny && !indexOnly;
         const assignHit = assignHitAny && !indexOnly;

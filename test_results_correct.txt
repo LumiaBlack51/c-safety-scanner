@@ -1,195 +1,25 @@
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:11: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    } AVLNode;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:20: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    AVLNode* createNode(int key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:20: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    AVLNode* createNode(int key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:21: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        AVLNode* node = (AVLNode*)malloc(sizeof(AVLNode));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:23: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            node->key = key;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:24: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            node->height = 1;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:21: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弉ode鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        AVLNode* node = (AVLNode*)malloc(sizeof(AVLNode));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:35: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            tree->root = NULL;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:36: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            tree->size = 0;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:33: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弔ree鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        AVLTree* tree = (AVLTree*)malloc(sizeof(AVLTree));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:42: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    int getHeight(AVLNode* node) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:43: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        return node ? node->height : 0;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:47: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    void updateHeight(AVLNode* node) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:51: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            node->height = (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:56: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    int getBalance(AVLNode* node) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:61: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    AVLNode* rightRotate(AVLNode* y) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:77: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    AVLNode* leftRotate(AVLNode* x) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:93: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    AVLNode* leftRightRotate(AVLNode* node) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:99: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    AVLNode* rightLeftRotate(AVLNode* node) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:105: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    AVLNode* insertNode(AVLNode* node, int key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:105: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    AVLNode* insertNode(AVLNode* node, int key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:108: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            return createNode(key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:111: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (key < node->key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:112: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            node->left = insertNode(node->left, key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:113: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        } else if (key > node->key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:114: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            node->right = insertNode(node->right, key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:121: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        updateHeight(node);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:128: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (balance > 1 && key < node->left->key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:128: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (balance > 1 && key < node->left->key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:129: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            return rightRotate(node);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:133: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (balance < -1 && key > node->right->key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:133: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (balance < -1 && key > node->right->key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:134: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            return leftRotate(node);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:138: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (balance > 1 && key > node->left->key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:138: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (balance > 1 && key > node->left->key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:139: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            return leftRightRotate(node);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:143: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (balance < -1 && key < node->right->key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:143: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (balance < -1 && key < node->right->key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:144: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            return rightLeftRotate(node);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:151: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    AVLNode* findMinNode(AVLNode* node) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:159: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    AVLNode* deleteNode(AVLNode* root, int key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:159: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    AVLNode* deleteNode(AVLNode* root, int key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:159: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    AVLNode* deleteNode(AVLNode* root, int key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:161: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (!root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:165: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (key < root->key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:165: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (key < root->key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:166: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            root->left = deleteNode(root->left, key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:166: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            root->left = deleteNode(root->left, key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:167: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        } else if (key > root->key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:167: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        } else if (key > root->key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:168: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            root->right = deleteNode(root->right, key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:168: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            root->right = deleteNode(root->right, key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:171: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            if (!root->left || !root->right) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:176: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?                    temp = root;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:185: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?                AVLNode* temp = findMinNode(root->right);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:186: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?                root->key = temp->key;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:187: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?                root->right = deleteNode(root->right, temp->key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:197: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        updateHeight(root);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:204: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (balance > 1 && getBalance(root->left) >= 0) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:205: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            return rightRotate(root);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:209: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (balance > 1 && getBalance(root->left) < 0) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:210: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            return leftRightRotate(root);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:214: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (balance < -1 && getBalance(root->right) <= 0) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:215: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            return leftRotate(root);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:219: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (balance < -1 && getBalance(root->right) > 0) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:220: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            return rightLeftRotate(root);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:227: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    AVLNode* searchNode(AVLNode* root, int key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:227: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    AVLNode* searchNode(AVLNode* root, int key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:227: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    AVLNode* searchNode(AVLNode* root, int key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:228: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (!root || root->key == key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:228: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (!root || root->key == key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:232: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (key < root->key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:232: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (key < root->key) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:233: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            return searchNode(root->left, key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:233: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            return searchNode(root->left, key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:235: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            return searchNode(root->right, key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:235: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-            return searchNode(root->right, key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:240: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    void inOrderTraversal(AVLNode* root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:240: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    void inOrderTraversal(AVLNode* root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:241: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:242: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            inOrderTraversal(root->left);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:243: [Format] 鏍煎紡瀛楃涓蹭笉鍖归厤锛?d 涓?return 绫诲瀷涓嶅吋瀹?            printf("%d ", root->key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:243: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            printf("%d ", root->key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:243: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            printf("%d ", root->key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:244: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            inOrderTraversal(root->right);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:249: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    void preOrderTraversal(AVLNode* root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:249: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    void preOrderTraversal(AVLNode* root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:250: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:251: [Format] 鏍煎紡瀛楃涓蹭笉鍖归厤锛?d 涓?return 绫诲瀷涓嶅吋瀹?            printf("%d ", root->key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:251: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            printf("%d ", root->key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:251: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            printf("%d ", root->key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:252: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            preOrderTraversal(root->left);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:253: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            preOrderTraversal(root->right);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:258: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    void postOrderTraversal(AVLNode* root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:258: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    void postOrderTraversal(AVLNode* root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:259: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:260: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            postOrderTraversal(root->left);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:261: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            postOrderTraversal(root->right);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:262: [Format] 鏍煎紡瀛楃涓蹭笉鍖归厤锛?d 涓?return 绫诲瀷涓嶅吋瀹?            printf("%d ", root->key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:262: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            printf("%d ", root->key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:262: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            printf("%d ", root->key);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:267: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    void freeTree(AVLNode* root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:267: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    void freeTree(AVLNode* root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:268: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:269: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            freeTree(root->left);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:270: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            freeTree(root->right);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:271: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            free(root);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:278: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            freeTree(tree->root);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:284: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    int calculateTreeHeight(AVLNode* root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:284: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    int calculateTreeHeight(AVLNode* root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:285: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (!root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:296: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    int isAVLTree(AVLNode* root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:296: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    int isAVLTree(AVLNode* root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:297: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (!root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:306: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        return isAVLTree(root->left) && isAVLTree(root->right);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:310: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    void printTreeStructure(AVLNode* root, int space) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:310: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?    void printTreeStructure(AVLNode* root, int space) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:311: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (!root) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:316: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        printTreeStructure(root->right, space);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:322: [Format] 鏍煎紡瀛楃涓蹭笉鍖归厤锛?d 涓?AVLNode* 绫诲瀷涓嶅吋瀹?        printf("%d (h:%d, b:%d)\n", root->key, root->height, getBalance(root));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:322: [Format] 鏍煎紡瀛楃涓蹭笉鍖归厤锛?d 涓?AVLNode* 绫诲瀷涓嶅吋瀹?        printf("%d (h:%d, b:%d)\n", root->key, root->height, getBalance(root));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:322: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        printf("%d (h:%d, b:%d)\n", root->key, root->height, getBalance(root));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:322: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        printf("%d (h:%d, b:%d)\n", root->key, root->height, getBalance(root));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:322: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        printf("%d (h:%d, b:%d)\n", root->key, root->height, getBalance(root));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:324: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        printTreeStructure(root->left, space);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:344: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            tree->root = insertNode(tree->root, testData[i]);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:345: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            tree->size++;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:348: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            if (!isAVLTree(tree->root)) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:353: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        printf("鎻掑叆瀹屾垚锛屾爲澶у皬锛?d\n", tree->size);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:354: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        printf("鏍戦珮搴︼細%d\n", calculateTreeHeight(tree->root));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:357: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        inOrderTraversal(tree->root);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:361: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        preOrderTraversal(tree->root);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:365: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        postOrderTraversal(tree->root);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:372: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            AVLNode* found = searchNode(tree->root, searchKeys[i]);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:372: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            AVLNode* found = searchNode(tree->root, searchKeys[i]);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:385: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            tree->root = deleteNode(tree->root, deleteKeys[i]);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:386: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            tree->size--;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:389: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            if (!isAVLTree(tree->root)) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:393: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            printf("鍒犻櫎鍚庢爲澶у皬锛?d锛岄珮搴︼細%d\n", tree->size, calculateTreeHeight(tree->root));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:393: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            printf("鍒犻櫎鍚庢爲澶у皬锛?d锛岄珮搴︼細%d\n", tree->size, calculateTreeHeight(tree->root));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:397: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        inOrderTraversal(tree->root);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:405: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        printf("绌烘爲楂樺害锛?d\n", calculateTreeHeight(emptyTree->root));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:406: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        printf("绌烘爲鏄疉VL鏍戯細%s\n", isAVLTree(emptyTree->root) ? "鏄? : "鍚?);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:409: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        emptyTree->root = insertNode(emptyTree->root, 42);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:410: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        printf("鍗曡妭鐐规爲楂樺害锛?d\n", calculateTreeHeight(emptyTree->root));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:411: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        printf("鍗曡妭鐐规爲鏄疉VL鏍戯細%s\n", isAVLTree(emptyTree->root) ? "鏄? : "鍚?);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:416: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            tree->root = insertNode(tree->root, i);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:418: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?                printf("鎻掑叆%d涓妭鐐瑰悗锛屾爲楂樺害锛?d\n", i, calculateTreeHeight(tree->root));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:422: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        printf("鏈€缁堟爲澶у皬锛?d锛岄珮搴︼細%d\n", tree->size + 1000, calculateTreeHeight(tree->root));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:422: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        printf("鏈€缁堟爲澶у皬锛?d锛岄珮搴︼細%d\n", tree->size + 1000, calculateTreeHeight(tree->root));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:423: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        printf("鏈€缁堟爲鏄疉VL鏍戯細%s\n", isAVLTree(tree->root) ? "鏄? : "鍚?);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:445: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            tree->root = insertNode(tree->root, i);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:447: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        printf("鎻掑叆10000涓妭鐐瑰畬鎴愶紝鏍戦珮搴︼細%d\n", calculateTreeHeight(tree->root));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:453: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            if (searchNode(tree->root, i)) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:462: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            tree->root = deleteNode(tree->root, i);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\avl_tree.c:464: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        printf("鍒犻櫎5000涓妭鐐瑰畬鎴愶紝鍓╀綑鏍戦珮搴︼細%d\n", calculateTreeHeight(tree->root));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\graph.c:6: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲廹鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        Graph* g = (Graph*)malloc(sizeof(Graph));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\graph.c:8: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲廻ead鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        g->head = (Edge**)calloc((size_t)n, sizeof(Edge*));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\graph.c:23: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲廵鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        Edge* e = (Edge*)malloc(sizeof(Edge));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\graph.c:34: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弎鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        int* q = (int*)malloc(sizeof(int) * (size_t)n); int hh = 0, tt = 0;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\graph.c:54: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弎鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        int* q = (int*)malloc(sizeof(int) * (size_t)n); int hh=0, tt=0;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\graph.c:56: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弌rder鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        int* order = (int*)malloc(sizeof(int)*(size_t)n); int k=0;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\graph.c:73: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弅ey鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        const int INF = 1e9; int n=g->n; int* key=(int*)malloc(sizeof(int)*(size_t)n); int* inMST=(int*)calloc((size_t)n,sizeof(int));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\main.c:17: [Dead loop] 娼滃湪姝诲惊鐜紙寰幆鏉′欢鏃犳硶婊¤冻閫€鍑烘潯浠讹級
-        while (1) { if (cnt >= 0) break; }
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\main.c:21: [Dead loop] 娼滃湪姝诲惊鐜紙寰幆鏉′欢鏃犳硶婊¤冻閫€鍑烘潯浠讹級
-        for (;;) { if (cnt > -1) break; }
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\main.c:15: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        bfs(g, 0, order, &cnt);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\main.c:18: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        printf("BFS count=%d first=%d\n", cnt, order[0]);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\main.c:20: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        cnt = 0; dfs(g, 0, order, &cnt);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\main.c:22: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        printf("DFS count=%d first=%d\n", cnt, order[0]);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\main.c:39: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        cnt2 = 0; dfs(g2, 0, order2, &cnt2);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\main.c:45: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲廳ist鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        int* dist = (int*)malloc(sizeof(int)* (size_t)n);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\correct\main.c:49: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弍arent鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        int* parent = (int*)malloc(sizeof(int)* (size_t)n);
-
-=== Global Variables Table ===
-Name               Type        Initialized
+21	Memory leak	内存泄漏：变量node分配的内存未释放
+33	Memory leak	内存泄漏：变量tree分配的内存未释放
+176	Uninitialized	变量使用前未初始化
+243	Format	printf 参数多于格式化占位数
+251	Format	printf 参数多于格式化占位数
+262	Format	printf 参数多于格式化占位数
+322	Format	printf 参数多于格式化占位数
+349	Format	printf 参数多于格式化占位数
+353	Format	printf 参数多于格式化占位数
+354	Format	printf 参数多于格式化占位数
+374	Format	printf 参数多于格式化占位数
+376	Format	printf 参数多于格式化占位数
+384	Format	printf 参数多于格式化占位数
+390	Format	printf 参数多于格式化占位数
+393	Format	printf 参数多于格式化占位数
+405	Format	printf 参数多于格式化占位数
+406	Format	printf 参数多于格式化占位数
+410	Format	printf 参数多于格式化占位数
+411	Format	printf 参数多于格式化占位数
+418	Format	printf 参数多于格式化占位数
+422	Format	printf 参数多于格式化占位数
+423	Format	printf 参数多于格式化占位数
+447	Format	printf 参数多于格式化占位数
+457	Format	printf 参数多于格式化占位数
+464	Format	printf 参数多于格式化占位数

@@ -143,6 +143,34 @@ export async function analyzeWorkspaceCFiles(root: vscode.Uri): Promise<Map<vsco
         if (ch === '}') { braceDepth = Math.max(0, braceDepth - 1); localsStack.pop(); funcStack.pop(); }
       }
 
+      // 函数定义头：将形参加入当前局部表并标记为已初始化
+      // 仅在出现形如 "ret f(type a, type *b){" 的行上启发式处理
+      if (raw.includes('(') && raw.includes(')') && raw.trim().endsWith('{') && !raw.trimStart().startsWith('#')) {
+        const lp = raw.indexOf('(');
+        const rp = raw.lastIndexOf(')');
+        if (lp >= 0 && rp > lp) {
+          const paramsRaw = raw.slice(lp + 1, rp).trim();
+          if (paramsRaw && paramsRaw !== 'void') {
+            const params = getArgsFromCall(raw); // 复用参数分割逻辑
+            const locals = currentLocals() ?? (localsStack.length > 0 ? localsStack[localsStack.length - 1] : undefined);
+            if (locals) {
+              for (const p of params) {
+                const token = p.trim();
+                if (!token) continue;
+                // 取最后一个标识符作为变量名（处理如 "const struct Foo *bar"）
+                const nameMatch = token.match(/([a-zA-Z_][\w]*)\s*$/);
+                if (!nameMatch) continue;
+                const name = nameMatch[1];
+                const isPtr = /\*/.test(token);
+                const typePart = token.replace(new RegExp(`([\\*\s])?${name}\s*$`), '').trim();
+                const typeName = typePart.replace(/\s+/g, ' ').replace(/\*+/g, '').trim() || 'int';
+                locals.set(name, { name, typeName, isPointer: isPtr, isInitialized: true, firstUseLine: null });
+              }
+            }
+          }
+        }
+      }
+
       // 变量声明
       if (isLikelyDecl(line)) {
         const decls = parseDecl(line);

@@ -1,25 +1,42 @@
-21	Memory leak	内存泄漏：变量node分配的内存未释放
-33	Memory leak	内存泄漏：变量tree分配的内存未释放
-176	Uninitialized	变量使用前未初始化
-243	Format	printf 参数多于格式化占位数
-251	Format	printf 参数多于格式化占位数
-262	Format	printf 参数多于格式化占位数
-322	Format	printf 参数多于格式化占位数
-349	Format	printf 参数多于格式化占位数
-353	Format	printf 参数多于格式化占位数
-354	Format	printf 参数多于格式化占位数
-374	Format	printf 参数多于格式化占位数
-376	Format	printf 参数多于格式化占位数
-384	Format	printf 参数多于格式化占位数
-390	Format	printf 参数多于格式化占位数
-393	Format	printf 参数多于格式化占位数
-405	Format	printf 参数多于格式化占位数
-406	Format	printf 参数多于格式化占位数
-410	Format	printf 参数多于格式化占位数
-411	Format	printf 参数多于格式化占位数
-418	Format	printf 参数多于格式化占位数
-422	Format	printf 参数多于格式化占位数
-423	Format	printf 参数多于格式化占位数
-447	Format	printf 参数多于格式化占位数
-457	Format	printf 参数多于格式化占位数
-464	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	21	Memory leak	内存泄漏：变量node分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	33	Memory leak	内存泄漏：变量tree分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	176	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	243	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	251	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	262	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	322	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	349	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	353	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	354	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	374	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	376	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	384	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	390	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	393	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	405	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	406	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	410	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	411	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	418	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	422	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	423	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	447	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	457	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\avl_tree.c	464	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\graph.c	6	Memory leak	内存泄漏：变量g分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\graph.c	8	Memory leak	内存泄漏：变量head分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\graph.c	23	Memory leak	内存泄漏：变量e分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\graph.c	34	Memory leak	内存泄漏：变量q分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\graph.c	54	Memory leak	内存泄漏：变量q分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\graph.c	56	Memory leak	内存泄漏：变量order分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\graph.c	73	Memory leak	内存泄漏：变量key分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\main.c	17	Dead loop	潜在死循环（循环条件无法满足退出条件）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\main.c	18	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\main.c	21	Dead loop	潜在死循环（循环条件无法满足退出条件）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\main.c	22	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\main.c	25	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\main.c	45	Memory leak	内存泄漏：变量dist分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\main.c	47	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\main.c	49	Memory leak	内存泄漏：变量parent分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\main.c	51	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\correct\main.c	56	Format	printf 参数多于格式化占位数

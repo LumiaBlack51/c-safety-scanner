@@ -1,144 +1,124 @@
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_0.c:1: [Header] 鍙枒鏍囧噯澶存枃浠? stdiox.h
-    #include <stdiox.h> // BUG: Header misspelling
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_0.c:7: [Dead loop] 娼滃湪姝诲惊鐜紙寰幆鏉′欢鏃犳硶婊¤冻閫€鍑烘潯浠讹級
-     for(;;){ if(x>0) break; } // BUG: likely infinite
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_0.c:5: [Header] 鍑芥暟 printf 闇€瑕佸寘鍚ご鏂囦欢 stdio.h
-     printf("%s %d", x, 123); // BUG: type mismatch
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_0.c:5: [Format] 鏍煎紡瀛楃涓蹭笉鍖归厤锛?s 涓?int 绫诲瀷涓嶅吋瀹?     printf("%s %d", x, 123); // BUG: type mismatch
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_0.c:5: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?     printf("%s %d", x, 123); // BUG: type mismatch
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_0.c:6: [Header] 鍑芥暟 scanf 闇€瑕佸寘鍚ご鏂囦欢 stdio.h
-     scanf("%d", x); // BUG: missing &
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_0.c:6: [Format] scanf 瀹炲弬寤鸿浼犲湴鍧€锛堜娇鐢?&var锛?     scanf("%d", x); // BUG: missing &
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_0.c:6: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?     scanf("%d", x); // BUG: missing &
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_0.c:7: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?     for(;;){ if(x>0) break; } // BUG: likely infinite
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_0.c:8: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-     *p = 1; // BUG: deref wild pointer
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:27: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        struct Point *p2;           // 鏄熷彿闈犺繎鍙橀噺鍚?C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:29: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        struct Point*p4;            // 鏄熷彿绱ц创绫诲瀷鍚?C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:57: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        p1->x = 10;        // BUG: 瑙ｅ紩鐢ㄦ湭鍒濆鍖栫殑缁撴瀯浣撴寚閽?C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:58: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        p2->y = 20;        // BUG: 瑙ｅ紩鐢ㄦ湭鍒濆鍖栫殑缁撴瀯浣撴寚閽?C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:59: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        p3->x = 30;        // BUG: 瑙ｅ紩鐢ㄦ湭鍒濆鍖栫殑缁撴瀯浣撴寚閽?C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:60: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        p4->y = 40;        // BUG: 瑙ｅ紩鐢ㄦ湭鍒濆鍖栫殑缁撴瀯浣撴寚閽?C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:63: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        point1.x = 100;    // 姝ｇ‘锛氳闂粨鏋勪綋鍙橀噺鎴愬憳
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:64: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        point1.y = 200;    // 姝ｇ‘锛氳闂粨鏋勪綋鍙橀噺鎴愬憳
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:74: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        node1.data = 42;   // 姝ｇ‘锛氳闂祵濂楃粨鏋勪綋鎴愬憳
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:78: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        graph1.vertices = 5; // 姝ｇ‘锛氳闂鏉傜粨鏋勪綋鎴愬憳
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:82: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        student1.id = 1;   // 姝ｇ‘锛氳闂畉ypedef缁撴瀯浣撴垚鍛?C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:83: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        student_ptr->id = 2; // BUG: 瑙ｅ紩鐢ㄦ湭鍒濆鍖栫殑鎸囬拡
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:91: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        struct Node* node1 = malloc(sizeof(struct Node));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:90: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弍2鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        struct Point* p2 = malloc(sizeof(struct Point));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:91: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弉ode1鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        struct Node* node1 = malloc(sizeof(struct Node));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:92: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲廹raph1鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        struct Graph* graph1 = malloc(sizeof(struct Graph));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:95: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弍3鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        struct Point* p3 = calloc(1, sizeof(struct Point));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:96: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弍4鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        struct Point* p4 = calloc(5, sizeof(struct Point)); // 鏁扮粍
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:99: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弍1鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        p1 = realloc(p1, sizeof(struct Point) * 2);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:142: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弍鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        struct Point* p = malloc(sizeof(struct Point));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:200: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            ptr_array[i] = malloc(sizeof(struct Point));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:208: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            node_ptr_array[i] = malloc(sizeof(struct Node));
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:218: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            printf("Point %d: (%d, %d)\n", i, points[i].x, points[i].y);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:224: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?                printf("Point %d: (%d, %d)\n", i, ptr_array[i]->x, ptr_array[i]->y);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:255: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        person1.name[0] = 'J';
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:255: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        person1.name[0] = 'J';
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:256: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        person1.age = 25;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:257: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        person1.address.zip = 12345;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:257: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        person1.address.zip = 12345;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:258: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        person1.spouse = NULL;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:265: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        person1.spouse = person_ptr; // 灏嗘湭鍒濆鍖栫殑鎸囬拡璧嬪€肩粰鎴愬憳
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:268: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (person1.spouse) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_44.c:269: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?            person1.spouse->age = 28; // 鍙兘瑙ｅ紩鐢∟ULL鎸囬拡
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_45.c:9: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        *ptr1 = 42; // BUG: 瑙ｅ紩鐢ㄩ噹鎸囬拡 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_45.c:12: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        str1[0] = 'A'; // BUG: 瑙ｅ紩鐢ㄩ噹鎸囬拡 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_45.c:15: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        arr1[0] = 3.14; // BUG: 瑙ｅ紩鐢ㄩ噹鎸囬拡 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_45.c:21: [Null pointer] 娼滃湪绌烘寚閽堣В寮曠敤锛堟寚閽堜负NULL锛?        *ptr2 = 100; // BUG: 瑙ｅ紩鐢ㄧ┖鎸囬拡 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_45.c:24: [Null pointer] 娼滃湪绌烘寚閽堣В寮曠敤锛堟寚閽堜负NULL锛?        str2[0] = 'B'; // BUG: 瑙ｅ紩鐢ㄧ┖鎸囬拡 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_45.c:27: [Null pointer] 娼滃湪绌烘寚閽堣В寮曠敤锛堟寚閽堜负NULL锛?        arr2[0] = 2.5; // BUG: 瑙ｅ紩鐢ㄧ┖鎸囬拡 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_45.c:33: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        printf("%d\n", *ptr3); // BUG: 瑙ｅ紩鐢ㄩ噹鎸囬拡 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_45.c:36: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        scanf("%s", str3); // BUG: 閲庢寚閽堜綔涓哄弬鏁?- 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_45.c:84: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        p1->x = 10; // BUG: 瑙ｅ紩鐢ㄩ噹鎸囬拡 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_45.c:85: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        p1->y = 20; // BUG: 瑙ｅ紩鐢ㄩ噹鎸囬拡 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_45.c:88: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        p2->x = 30; // BUG瑙ｅ紩鐢ㄧ┖鎸囬拡 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_45.c:89: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        p2->y = 40; // BUG瑙ｅ紩鐢ㄧ┖鎸囬拡 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_45.c:95: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        arr1[0] = 1; // BUG: 瑙ｅ紩鐢ㄩ噹鎸囬拡 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_45.c:96: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        arr1[1] = 2; // BUG: 瑙ｅ紩鐢ㄩ噹鎸囬拡 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_45.c:99: [Null pointer] 娼滃湪绌烘寚閽堣В寮曠敤锛堟寚閽堜负NULL锛?        arr2[0] = 3; // BUG: 瑙ｅ紩鐢ㄧ┖鎸囬拡 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_45.c:100: [Null pointer] 娼滃湪绌烘寚閽堣В寮曠敤锛堟寚閽堜负NULL锛?        arr2[1] = 4; // BUG: 瑙ｅ紩鐢ㄧ┖鎸囬拡 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_46.c:10: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弍tr1鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        int *ptr1 = malloc(sizeof(int) * 10);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_46.c:11: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弒tr1鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        char *str1 = malloc(100);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_46.c:46: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弒tr3鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        char *str3 = malloc(30);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_46.c:47: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲廰rr3鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        float *arr3 = malloc(sizeof(float) * 5);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_46.c:67: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弍tr4鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        int *ptr4 = malloc(sizeof(int) * 10);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_46.c:72: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弍tr4鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-            ptr4 = realloc(ptr4, sizeof(int) * 20);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_46.c:82: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弔emp鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        char *temp = malloc(20);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_46.c:103: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弒tr6鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        char *str6 = malloc(40);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_47.c:7: [Range overflow] 鍒濆鍖栨暟鍊艰秴鍑篶har绫诲瀷鑼冨洿
-        char c1 = 128;        // BUG: 瓒呭嚭char鑼冨洿(-128鍒?27)
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_47.c:8: [Range overflow] 鍒濆鍖栨暟鍊艰秴鍑篶har绫诲瀷鑼冨洿
-        char c2 = -200;       // BUG: 瓒呭嚭char鑼冨洿(-128鍒?27)
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_47.c:9: [Range overflow] 鍒濆鍖栨暟鍊艰秴鍑簎nsigned char绫诲瀷鑼冨洿
-        unsigned char uc = 300; // BUG: 瓒呭嚭unsigned char鑼冨洿(0鍒?55)
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_47.c:12: [Range overflow] 鍒濆鍖栨暟鍊艰秴鍑簊hort绫诲瀷鑼冨洿
-        short s1 = 40000;     // BUG: 瓒呭嚭short鑼冨洿(-32768鍒?2767)
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_47.c:13: [Range overflow] 鍒濆鍖栨暟鍊艰秴鍑簊hort绫诲瀷鑼冨洿
-        short s2 = -40000;    // BUG: 瓒呭嚭short鑼冨洿(-32768鍒?2767)
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_47.c:14: [Range overflow] 鍒濆鍖栨暟鍊艰秴鍑簎nsigned short绫诲瀷鑼冨洿
-        unsigned short us = 70000; // BUG: 瓒呭嚭unsigned short鑼冨洿(0鍒?5535)
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_47.c:17: [Range overflow] 鍒濆鍖栨暟鍊艰秴鍑篿nt绫诲瀷鑼冨洿
-        int i1 = 3000000000;  // BUG: 瓒呭嚭int鑼冨洿(-2147483648鍒?147483647)
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_47.c:18: [Range overflow] 鍒濆鍖栨暟鍊艰秴鍑篿nt绫诲瀷鑼冨洿
-        int i2 = -3000000000; // BUG: 瓒呭嚭int鑼冨洿(-2147483648鍒?147483647)
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_47.c:19: [Range overflow] 鍒濆鍖栨暟鍊艰秴鍑簎nsigned int绫诲瀷鑼冨洿
-        unsigned int ui = 5000000000; // BUG: 瓒呭嚭unsigned int鑼冨洿(0鍒?294967295)
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_47.c:22: [Range overflow] 鍒濆鍖栨暟鍊艰秴鍑篶har绫诲瀷鑼冨洿
-        char c3 = 0x100;      // BUG: 0x100 = 256锛岃秴鍑篶har鑼冨洿
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_47.c:23: [Range overflow] 鍒濆鍖栨暟鍊艰秴鍑篿nt绫诲瀷鑼冨洿
-        int i3 = 0xFFFFFFFF;  // BUG: 0xFFFFFFFF = 4294967295锛岃秴鍑篿nt鑼冨洿
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_47.c:26: [Range overflow] 鍒濆鍖栨暟鍊艰秴鍑篶har绫诲瀷鑼冨洿
-        char c4 = 0400;       // BUG: 0400 = 256锛岃秴鍑篶har鑼冨洿
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_47.c:27: [Range overflow] 鍒濆鍖栨暟鍊艰秴鍑簊hort绫诲瀷鑼冨洿
-        short s3 = 0100000;   // BUG: 0100000 = 32768锛岃秴鍑簊hort鑼冨洿
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_48.c:7: [Dead loop] 娼滃湪姝诲惊鐜紙寰幆鏉′欢鏃犳硶婊¤冻閫€鍑烘潯浠讹級
-        for(;;) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_48.c:15: [Dead loop] 娼滃湪姝诲惊鐜紙寰幆鏉′欢鏃犳硶婊¤冻閫€鍑烘潯浠讹級
-        while(1) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_48.c:39: [Dead loop] 娼滃湪姝诲惊鐜紙寰幆鏉′欢鏃犳硶婊¤冻閫€鍑烘潯浠讹級
-        for(int i = 0; i == 10; i += 3) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_48.c:112: [Dead loop] 娼滃湪姝诲惊鐜紙寰幆鏉′欢鏃犳硶婊¤冻閫€鍑烘潯浠讹級
-            for(;;) {
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_49.c:22: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (static_flag) {                      // 搴旇鎶ラ敊锛氭湭鍒濆鍖栦娇鐢?C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_50.c:22: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        if (static_flag) {                    // 浣跨敤鏈垵濮嬪寲鐨?static 鍙橀噺 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\bug_50.c:26: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        *static_ptr = 'a';                    // 瑙ｅ紩鐢ㄦ湭鍒濆鍖栫殑 static 鎸囬拡 - 搴旇鎶ラ敊
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\debug_null.c:5: [Null pointer] 娼滃湪绌烘寚閽堣В寮曠敤锛堟寚閽堜负NULL锛?        *ptr = 42;        // 搴旇妫€娴嬪埌绌烘寚閽堣В寮曠敤
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\debug_struct.c:7: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        p2->x = 30;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\graph.c:7: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        g->n = n; // BUG: 鏈垵濮嬪寲鎸囬拡瑙ｅ紩鐢?C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\graph.c:8: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        g->head = (Edge**)malloc(sizeof(Edge*) * (size_t)n); // BUG: 鏈竻闆?C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\graph.c:8: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲廻ead鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        g->head = (Edge**)malloc(sizeof(Edge*) * (size_t)n); // BUG: 鏈竻闆?C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\graph.c:23: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        e->to = v; e->w = w; e->next = g->head[u]; // BUG
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\graph.c:24: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        g->head[u] = e;
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\graph.c:36: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        int* q = (int*)malloc(sizeof(int) * (size_t)n); // BUG: 浣跨敤鏈垵濮嬪寲 n
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\graph.c:36: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲弎鍒嗛厤鐨勫唴瀛樻湭閲婃斁
-        int* q = (int*)malloc(sizeof(int) * (size_t)n); // BUG: 浣跨敤鏈垵濮嬪寲 n
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\graph.c:53: [Format] 鏍煎紡瀛楃涓蹭笉鍖归厤锛?s 涓?int 绫诲瀷涓嶅吋瀹?        printf("%s", x); // BUG: %s 涓?int 涓嶅尮閰?C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\main.c:12: [Dead loop] 娼滃湪姝诲惊鐜紙寰幆鏉′欢鏃犳硶婊¤冻閫€鍑烘潯浠讹級
-        while (1) { int z = 0; z++; }
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\main.c:10: [Uninitialized] 鍙橀噺浣跨敤鍓嶆湭鍒濆鍖?        dijkstra(g, 0, dist);
-C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\main.c:13: [Format] printf 鍙傛暟灏戜簬鏍煎紡鍖栧崰浣嶆暟
-        printf("%d %d %d\n", dist[0], dist[1]); // BUG: 灏戝弬鏁?C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\main.c:13: [Wild pointer] 娼滃湪閲庢寚閽堣В寮曠敤锛堟寚閽堟湭鍒濆鍖栵級
-        printf("%d %d %d\n", dist[0], dist[1]); // BUG: 灏戝弬鏁?C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\test\buggy\simple_debug.c:3: [Null pointer] 娼滃湪绌烘寚閽堣В寮曠敤锛堟寚閽堜负NULL锛?        *ptr = 42;
-
-=== Global Variables Table ===
-Name               Type        Initialized
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_0.c	1	Header	可疑标准头文件: stdiox.h
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_0.c	5	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_0.c	5	Header	函数 printf 需要包含头文件 stdio.h
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_0.c	6	Format	scanf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_0.c	6	Format	scanf 实参建议传地址（使用 &var）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_0.c	6	Header	函数 scanf 需要包含头文件 stdio.h
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_0.c	7	Dead loop	潜在死循环（循环条件无法满足退出条件）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_0.c	7	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_0.c	8	Wild pointer	潜在野指针解引用（指针未初始化）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	27	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	29	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	57	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	58	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	59	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	60	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	63	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	64	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	74	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	78	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	82	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	83	Wild pointer	潜在野指针解引用（指针未初始化）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	90	Memory leak	内存泄漏：变量p2分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	91	Memory leak	内存泄漏：变量node1分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	92	Memory leak	内存泄漏：变量graph1分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	95	Memory leak	内存泄漏：变量p3分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	96	Memory leak	内存泄漏：变量p4分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	99	Memory leak	内存泄漏：变量p1分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	142	Memory leak	内存泄漏：变量p分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	152	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	218	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	224	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	255	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	255	Wild pointer	潜在野指针解引用（指针未初始化）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	256	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	257	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	258	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	265	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_44.c	269	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	9	Wild pointer	潜在野指针解引用（指针未初始化）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	12	Wild pointer	潜在野指针解引用（指针未初始化）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	15	Wild pointer	潜在野指针解引用（指针未初始化）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	21	Null pointer	潜在空指针解引用（指针为NULL）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	24	Null pointer	潜在空指针解引用（指针为NULL）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	27	Null pointer	潜在空指针解引用（指针为NULL）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	33	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	36	Format	scanf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	42	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	45	Format	scanf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	52	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	56	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	61	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	84	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	85	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	88	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	89	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	95	Wild pointer	潜在野指针解引用（指针未初始化）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	96	Wild pointer	潜在野指针解引用（指针未初始化）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	99	Null pointer	潜在空指针解引用（指针为NULL）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_45.c	100	Null pointer	潜在空指针解引用（指针为NULL）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_46.c	10	Memory leak	内存泄漏：变量ptr1分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_46.c	11	Memory leak	内存泄漏：变量str1分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_46.c	20	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_46.c	21	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_46.c	22	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_46.c	34	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_46.c	35	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_46.c	46	Memory leak	内存泄漏：变量str3分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_46.c	47	Memory leak	内存泄漏：变量arr3分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_46.c	67	Memory leak	内存泄漏：变量ptr4分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_46.c	72	Memory leak	内存泄漏：变量ptr4分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_46.c	82	Memory leak	内存泄漏：变量temp分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_46.c	103	Memory leak	内存泄漏：变量str6分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_47.c	7	Range overflow	初始化数值超出char类型范围
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_47.c	8	Range overflow	初始化数值超出char类型范围
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_47.c	9	Range overflow	初始化数值超出unsigned char类型范围
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_47.c	12	Range overflow	初始化数值超出short类型范围
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_47.c	13	Range overflow	初始化数值超出short类型范围
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_47.c	14	Range overflow	初始化数值超出unsigned short类型范围
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_47.c	17	Range overflow	初始化数值超出int类型范围
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_47.c	18	Range overflow	初始化数值超出int类型范围
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_47.c	19	Range overflow	初始化数值超出unsigned int类型范围
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_47.c	22	Range overflow	初始化数值超出char类型范围
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_47.c	23	Range overflow	初始化数值超出int类型范围
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_47.c	26	Range overflow	初始化数值超出char类型范围
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_47.c	27	Range overflow	初始化数值超出short类型范围
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_47.c	43	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_47.c	44	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_47.c	45	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_48.c	7	Dead loop	潜在死循环（循环条件无法满足退出条件）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_48.c	15	Dead loop	潜在死循环（循环条件无法满足退出条件）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_48.c	24	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_48.c	32	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_48.c	39	Dead loop	潜在死循环（循环条件无法满足退出条件）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_48.c	40	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_48.c	48	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_48.c	56	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_48.c	64	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_48.c	73	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_48.c	94	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_48.c	103	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_48.c	112	Dead loop	潜在死循环（循环条件无法满足退出条件）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_48.c	123	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_48.c	132	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_49.c	7	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_49.c	9	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_49.c	13	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_49.c	22	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_49.c	32	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_49.c	33	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_50.c	22	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_50.c	26	Wild pointer	潜在野指针解引用（指针未初始化）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_50.c	28	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_50.c	29	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\bug_50.c	33	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\graph.c	7	Wild pointer	潜在野指针解引用（指针未初始化）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\graph.c	8	Memory leak	内存泄漏：变量head分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\graph.c	8	Wild pointer	潜在野指针解引用（指针未初始化）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\graph.c	23	Wild pointer	潜在野指针解引用（指针未初始化）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\graph.c	24	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\graph.c	36	Memory leak	内存泄漏：变量q分配的内存未释放
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\graph.c	36	Uninitialized	变量使用前未初始化
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\graph.c	53	Format	printf 参数多于格式化占位数
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\main.c	12	Dead loop	潜在死循环（循环条件无法满足退出条件）
+C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\912\tests\graphs\buggy\main.c	13	Format	printf 参数多于格式化占位数

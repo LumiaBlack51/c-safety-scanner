@@ -1,4 +1,4 @@
-import Parser = require('tree-sitter');
+import Parser from 'tree-sitter';
 const C = require('tree-sitter-c');
 
 export interface ASTNode {

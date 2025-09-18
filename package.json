@@ -44,10 +44,12 @@
     "@types/node": "^18.19.50",
     "@types/vscode": "^1.90.0",
     "@vscode/vsce": "^3.6.0",
+    "tree-sitter-cli": "^0.25.9",
     "typescript": "^5.5.4"
   },
   "dependencies": {
     "tree-sitter": "^0.22.4",
-    "tree-sitter-c": "^0.20.7"
+    "tree-sitter-c": "^0.20.7",
+    "web-tree-sitter": "^0.24.4"
   }
 }

@@ -1,7 +1,76 @@
-# C Safety Scanner 项目状态清单
+# C Safety Scanner · 项目状态（2025-09-18）
 
-## 项目概述
-这是一个基于启发式分析的C代码安全扫描器，用于检测未初始化变量、野指针、死循环、内存泄漏、格式字符串错误等问题。
+## 一、项目概述
+面向 C 语言的静态安全扫描工具，支持命令行与 VS Code 扩展两种形态。当前已实现 9 类检测：
+- 未初始化变量、野指针、空指针
+- 库函数头文件缺失、头文件拼写
+- 死循环
+- 数值范围溢出
+- 内存泄漏（malloc/free 配对）
+- printf/scanf 格式字符串
+
+核心实现正从启发式逻辑迁移到 AST 方案。为适配 Windows/Node 的兼容性，已引入 web-tree-sitter(WASM) 回退路径。
+
+## 二、依赖与环境
+- Node.js: 18.x（便携版已接入当前会话）
+- TypeScript: 5.5+
+- 解析依赖：
+  - 原生方案：tree-sitter ^0.22.4 + tree-sitter-c（尝试 0.24.1/0.20.7 均存在本机兼容问题）
+  - WASM 方案：web-tree-sitter ^0.24.4 + tree-sitter-c.wasm（需放置于 `assets/grammars/tree-sitter-c.wasm`）
+- VS Code 扩展引擎：^1.90.0
+
+## 三、关键目录
+- src/core：AST 解析与扫描调度（`ast_parser.ts` 支持原生/wasm 双路径）
+- src/detectors：三类 AST 检测器（变量/库函数/高级）
+- src/interfaces：CLI、扩展入口、评测与报告
+- assets/grammars：WASM 语法包（`tree-sitter-c.wasm`）
+
+## 四、近期进展
+1) 新增“评测模式” -- 从源码注释解析标准答案：
+   - 标准标签：`BUG: Header|Wild pointer|Null pointer|Uninitialized|Dead loop|Memory leak|Range overflow|Format`
+   - 输出“缺失(漏报)/多报(误报)/类别不匹配(逐行)/汇总差值”
+2) 误报优化：
+   - Header 缺失按头文件去重；
+   - Memory leak 支持“所有权返回/输出参数转移”豁免；
+   - 死循环：循环体内出现 break/return/exit/goto 不报；
+   - 野/空指针：弱数据流覆盖（声明到使用之间若有取址/赋值/malloc 视为已初始化/非空）；
+   - printf：过滤 `%%` 并收紧参数计数。
+3) AST 方案：
+   - 原生绑定（tree-sitter-c）在本机 Windows + OneDrive 路径下构建仍失败；
+   - 已接入 web-tree-sitter 回退，需有效的 wasm 包。
+
+## 五、当前指标（buggy 集评测）
+- 缺失(漏报)：Uninitialized×2, Wild pointer×7, Null pointer×3
+- 多报(误报)：Header×5, Memory leak×8, Dead loop×7, Format×4, Range overflow×6
+- 类别不匹配(逐行)：存在（例如 `line 4` 预期 Wild pointer，报告 Dead loop）
+- 分类计数差值总和：42（越小越好）
+
+注：在 AST 未启用时仍走启发式，误报/漏报较高。启用 WASM AST 后预期显著下降。
+
+## 六、测试方法
+1) 编译：`npm run compile`
+2) 扫描：
+   - 错误集：`npm run scan:buggy`
+   - 正确集：`npm run scan:correct`
+3) 评测：
+   - 对照标准标签：`node ./out/interfaces/cli_standalone.js tests/graphs/buggy --eval`
+   - 输出逐行对比与汇总统计，并报告“类别不匹配”。
+
+## 七、下一步计划
+1) 完成 WASM AST 启用：下载/构建 `tree-sitter-c.wasm` 并默认走 AST；
+2) 持续降低误报：
+   - Header：限定首处调用附近窗口检测；
+   - Dead loop：增加条件退出（break in branches）更精准分析；
+   - 指针：扩展跨语句、简单跨块的赋值追踪；
+   - Format：依据类型关键字/取址符号做更严格匹配；
+3) 扩展规则：缓冲区越界、未匹配的 realloc 失败路径、资源泄漏（文件句柄）等。
+
+## 八、已知问题与规避
+- 原生 tree-sitter-c 与当前环境的 ABI/路径存在兼容问题；建议优先使用 WASM。
+- OneDrive 路径可能导致构建缓存与长度限制问题，已通过忽略 `node_modules.bak/` 规避。
+
+---
+维护者：本地开发团队 · 2025-09-18
 
 ## 当前技术架构
 - **核心方法**: 启发式行级解析 + 模块化架构

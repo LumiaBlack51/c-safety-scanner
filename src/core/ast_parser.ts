@@ -1,5 +1,13 @@
-import Parser from 'tree-sitter';
-const C = require('tree-sitter-c');
+// AST 解析器：优先使用原生 tree-sitter，失败则回退到 web-tree-sitter(WASM)
+let NativeParser: any = null;
+let NativeC: any = null;
+try {
+  // 尝试加载原生绑定
+  NativeParser = require('tree-sitter');
+  NativeC = require('tree-sitter-c');
+} catch (_) {
+  // 忽略，在 WASM 路径中初始化
+}
 
 export interface ASTNode {
   type: string;
@@ -37,11 +45,47 @@ export interface IncludeDirective {
 }
 
 export class CASTParser {
-  private parser: Parser;
+  private parser: any;
 
-  constructor() {
-    this.parser = new Parser();
-    this.parser.setLanguage(C as any);
+  constructor(parser?: any) {
+    if (parser) {
+      this.parser = parser;
+      return;
+    }
+    if (NativeParser && NativeC) {
+      const p = new NativeParser();
+      p.setLanguage(NativeC);
+      this.parser = p;
+      return;
+    }
+    throw new Error('Native tree-sitter 不可用，请使用 CASTParser.create() (WASM)');
+  }
+
+  static async create(): Promise<CASTParser> {
+    // 原生可用
+    if (NativeParser && NativeC) {
+      const p = new NativeParser();
+      p.setLanguage(NativeC);
+      return new CASTParser(p);
+    }
+    // WASM 回退
+    const WTS = require('web-tree-sitter');
+    await WTS.init();
+    // 优先从本地 assets 读取 wasm，若不存在则尝试从 tree-sitter-c 包内的预编译资源（若提供）
+    const path = require('path');
+    const fs = require('fs');
+    const candidates = [
+      path.join(process.cwd(), 'assets', 'grammars', 'tree-sitter-c.wasm'),
+      path.join(__dirname, '..', '..', 'assets', 'grammars', 'tree-sitter-c.wasm')
+    ];
+    let wasmPath = candidates.find((p: string) => fs.existsSync(p));
+    if (!wasmPath) {
+      throw new Error('tree-sitter-c.wasm 未找到。请将 wasm 放置于 assets/grammars/tree-sitter-c.wasm');
+    }
+    const C_lang = await WTS.Language.load(wasmPath);
+    const parser = new WTS();
+    parser.setLanguage(C_lang);
+    return new CASTParser(parser);
   }
 
   /**
@@ -55,7 +99,7 @@ export class CASTParser {
   /**
    * 转换 tree-sitter 节点为我们的 ASTNode 接口
    */
-  private convertNode(node: Parser.SyntaxNode, parent?: ASTNode): ASTNode {
+  private convertNode(node: any, parent?: ASTNode): ASTNode {
     const astNode: ASTNode = {
       type: node.type,
       text: node.text,

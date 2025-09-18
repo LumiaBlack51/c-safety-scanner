@@ -13,7 +13,7 @@ async function analyzeDir(dir: string): Promise<Issue[]> {
   let parser: CASTParser | null = null;
   
   try {
-    parser = new CASTParser();
+    parser = await CASTParser.create();
     astAvailable = true;
     console.log('AST解析器初始化成功');
   } catch (error) {
@@ -34,15 +34,15 @@ async function analyzeDir(dir: string): Promise<Issue[]> {
         const ast = parser.parse(content);
         
         // 1. 未初始化变量检测
-        const uninitIssues = checkUninitializedVariables(ast, lines, filePath);
+        const uninitIssues = await checkUninitializedVariables(ast, lines, filePath);
         issues.push(...uninitIssues);
         
         // 2. 野指针检测
-        const wildPointerIssues = checkWildPointers(ast, lines, filePath);
+        const wildPointerIssues = await checkWildPointers(ast, lines, filePath);
         issues.push(...wildPointerIssues);
         
         // 3. 空指针检测
-        const nullPointerIssues = checkNullPointers(ast, lines, filePath);
+        const nullPointerIssues = await checkNullPointers(ast, lines, filePath);
         issues.push(...nullPointerIssues);
         
         // 4. 死循环检测
@@ -127,11 +127,11 @@ function printTables() {
 // === CLI专用的AST检测函数 ===
 
 // 1. 未初始化变量检测
-function checkUninitializedVariables(ast: any, lines: string[], filePath: string): Issue[] {
+async function checkUninitializedVariables(ast: any, lines: string[], filePath: string): Promise<Issue[]> {
   const issues: Issue[] = [];
   
   try {
-    const parser = new CASTParser();
+  const parser = await CASTParser.create();
     const declarations = parser.extractVariableDeclarations(ast, lines);
     
     for (const decl of declarations) {
@@ -160,11 +160,11 @@ function checkUninitializedVariables(ast: any, lines: string[], filePath: string
 }
 
 // 2. 野指针检测
-function checkWildPointers(ast: any, lines: string[], filePath: string): Issue[] {
+async function checkWildPointers(ast: any, lines: string[], filePath: string): Promise<Issue[]> {
   const issues: Issue[] = [];
   
   try {
-    const parser = new CASTParser();
+    const parser = await CASTParser.create();
     const declarations = parser.extractVariableDeclarations(ast, lines);
     
     for (const decl of declarations) {
@@ -191,11 +191,11 @@ function checkWildPointers(ast: any, lines: string[], filePath: string): Issue[]
 }
 
 // 3. 空指针检测
-function checkNullPointers(ast: any, lines: string[], filePath: string): Issue[] {
+async function checkNullPointers(ast: any, lines: string[], filePath: string): Promise<Issue[]> {
   const issues: Issue[] = [];
   
   try {
-    const parser = new CASTParser();
+    const parser = await CASTParser.create();
     const declarations = parser.extractVariableDeclarations(ast, lines);
     
     for (const decl of declarations) {

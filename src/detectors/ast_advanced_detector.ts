@@ -9,7 +9,11 @@ export class ASTAdvancedDetector {
   private parser: CASTParser;
 
   constructor() {
-    this.parser = new CASTParser();
+    try {
+      this.parser = new CASTParser();
+    } catch {
+      this.parser = {} as any;
+    }
   }
 
   /**

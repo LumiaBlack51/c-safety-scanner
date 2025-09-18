@@ -9,7 +9,13 @@ export class ASTVariableDetector {
   private parser: CASTParser;
 
   constructor() {
-    this.parser = new CASTParser();
+    try {
+      this.parser = new CASTParser();
+    } catch {
+      // 将在 CLI 中统一用 CASTParser.create() 路径，不在此处实例化
+      // 保留占位，若被直接使用需外部重构为异步
+      this.parser = {} as any;
+    }
   }
 
   /**

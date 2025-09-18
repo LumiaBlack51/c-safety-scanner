@@ -30,7 +30,7 @@ export async function analyzeWorkspaceCFilesAST(root: vscode.Uri): Promise<Map<v
       const document = await vscode.workspace.openTextDocument(file);
       const sourceCode = document.getText();
       const sourceLines = sourceCode.split(/\r?\n/);
-      const parser = new CASTParser();
+      const parser = await CASTParser.create();
       const ast = parser.parse(sourceCode);
       
       const nullPointerDiags = variableDetector.checkNullPointerDereference(ast, sourceLines);

@@ -637,9 +637,9 @@ export function analyzeCFile(filePath: string): { issues: Issue[]; globals: Segm
     }
     
     // printf/scanf 格式字符串检查
-    if (/\b(printf|scanf)\s*\(/.test(lineNoStr)) {
-      const isScanf = /\bscanf\s*\(/.test(lineNoStr);
-      const args = getArgsFromCall(lineNoStr);
+    if (/\b(printf|scanf)\s*\(/.test(line)) {
+      const isScanf = /\bscanf\s*\(/.test(line);
+      const args = getArgsFromCall(line);
       if (args.length >= 1) {
         const fmt = args[0];
         const fmtStrMatch = fmt.match(/^[\s\(]*"([\s\S]*?)"[\s\)]*$/);

@@ -1,7 +1,7 @@
 {
-  "name": "c-safety-scanner",
-  "displayName": "C Safety Scanner",
-  "description": "扫描用户目录下所有 .c 文件，检测未初始化变量、野指针、printf/scanf 误用、潜在死循环。",
+  "name": "clanguage-runtime-bug-detector",
+  "displayName": "C Language Runtime Bug Detector",
+  "description": "基于抽象语法树(AST)的C代码安全扫描工具，使用tree-sitter进行精确的语法分析，检测常见的编程错误和安全问题。",
   "version": "0.0.1",
   "publisher": "localdev",
   "engines": {

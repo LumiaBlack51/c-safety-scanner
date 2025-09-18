@@ -1,7 +1,7 @@
 import * as child_process from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
-import { Issue } from './scanner_cli';
+import { Issue } from '../interfaces/types';
 
 function which(cmd: string): string | null {
   try {

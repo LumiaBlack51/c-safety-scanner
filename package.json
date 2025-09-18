@@ -32,10 +32,10 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "lint": "echo 'no lint configured'",
-    "test": "node ./out/cli.js",
+    "test": "node ./out/interfaces/cli_standalone.js",
     "gen:buggy": "node scripts/gen_buggy_graphs.js",
-    "scan:correct": "node ./out/cli.js tests/graphs/correct",
-    "scan:buggy": "node ./out/cli.js tests/graphs/buggy",
+    "scan:correct": "node ./out/interfaces/cli_standalone.js tests/graphs/correct",
+    "scan:buggy": "node ./out/interfaces/cli_standalone.js tests/graphs/buggy",
     "report:buggy": "node ./out/report.js tests/graphs/buggy",
     "report:correct": "node ./out/report.js tests/graphs/correct",
     "vsce:package": "npx vsce package"
@@ -46,5 +46,8 @@
     "@vscode/vsce": "^3.6.0",
     "typescript": "^5.5.4"
   },
-  "dependencies": {}
+  "dependencies": {
+    "tree-sitter": "^0.22.4",
+    "tree-sitter-c": "^0.24.1"
+  }
 }

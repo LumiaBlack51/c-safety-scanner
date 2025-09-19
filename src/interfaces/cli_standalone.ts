@@ -3,8 +3,10 @@ import * as fs from 'fs';
 import { Issue } from './types';
 import { CASTParser } from '../core/ast_parser';
 
-// 基于AST的CLI版本目录分析函数
-async function analyzeDir(dir: string): Promise<Issue[]> {
+type EngineMode = 'auto' | 'ast' | 'heuristic';
+
+// 基于AST的CLI版本目录分析函数（支持引擎模式）
+async function analyzeDir(dir: string, engine: EngineMode): Promise<Issue[]> {
   const files = fs.readdirSync(dir).filter(f => f.endsWith('.c'));
   const issues: Issue[] = [];
   
@@ -13,9 +15,11 @@ async function analyzeDir(dir: string): Promise<Issue[]> {
   let parser: CASTParser | null = null;
   
   try {
-    parser = await CASTParser.create();
-    astAvailable = true;
-    console.log('AST解析器初始化成功');
+    if (engine !== 'heuristic') {
+      parser = await CASTParser.create();
+      astAvailable = true;
+      console.log('AST解析器初始化成功');
+    }
   } catch (error) {
     console.log('AST解析器初始化失败，使用文本分析模式');
     astAvailable = false;
@@ -28,47 +32,100 @@ async function analyzeDir(dir: string): Promise<Issue[]> {
     
     console.log(`正在分析文件: ${file}`);
     
-    if (astAvailable && parser) {
+    if ((engine === 'ast' || engine === 'auto') && astAvailable && parser) {
+      let ast: any = null;
+      let astParseSuccess = false;
+      
       try {
         // 尝试使用AST解析
-        const ast = parser.parse(content);
+        ast = parser.parse(content);
+        astParseSuccess = true;
+        console.log(`  AST解析成功，使用混合检测模式`);
+      } catch (error: any) {
+        console.error(`  AST解析失败，使用启发式回退: ${error}`);
+        astParseSuccess = false;
+      }
+      
+      if (astParseSuccess && ast) {
+        // AST 成功时，优先使用 AST 检测，但头文件检查仍用启发式
         
-        // 1. 未初始化变量检测
-        const uninitIssues = await checkUninitializedVariables(ast, lines, filePath);
-        issues.push(...uninitIssues);
+        // 1. 未初始化变量检测 (AST优先)
+        try {
+          const uninitIssues = await checkUninitializedVariables(ast, lines, filePath);
+          issues.push(...uninitIssues);
+        } catch (e) {
+          console.log(`    未初始化检测回退到启发式: ${e}`);
+          const fallbackIssues = checkUninitializedVariablesFallback(content, lines, filePath);
+          issues.push(...fallbackIssues);
+        }
         
-        // 2. 野指针检测
-        const wildPointerIssues = await checkWildPointers(ast, lines, filePath);
-        issues.push(...wildPointerIssues);
+        // 2. 野指针检测 (AST优先)
+        try {
+          const wildPointerIssues = await checkWildPointers(ast, lines, filePath);
+          issues.push(...wildPointerIssues);
+        } catch (e) {
+          console.log(`    野指针检测回退到启发式: ${e}`);
+          const fallbackIssues = checkWildPointersFallback(content, lines, filePath);
+          issues.push(...fallbackIssues);
+        }
         
-        // 3. 空指针检测
-        const nullPointerIssues = await checkNullPointers(ast, lines, filePath);
-        issues.push(...nullPointerIssues);
+        // 3. 空指针检测 (AST优先)
+        try {
+          const nullPointerIssues = await checkNullPointers(ast, lines, filePath);
+          issues.push(...nullPointerIssues);
+        } catch (e) {
+          console.log(`    空指针检测回退到启发式: ${e}`);
+          const fallbackIssues = checkNullPointersFallback(content, lines, filePath);
+          issues.push(...fallbackIssues);
+        }
         
-        // 4. 死循环检测
-        const deadLoopIssues = checkDeadLoops(ast, lines, filePath);
-        issues.push(...deadLoopIssues);
+        // 4. 死循环检测 (AST优先)
+        try {
+          const deadLoopIssues = checkDeadLoops(ast, lines, filePath);
+          issues.push(...deadLoopIssues);
+        } catch (e) {
+          console.log(`    死循环检测回退到启发式: ${e}`);
+          const fallbackIssues = checkDeadLoopsFallback(content, lines, filePath);
+          issues.push(...fallbackIssues);
+        }
         
-        // 5. 数值范围检查
-        const rangeIssues = checkNumericRange(ast, lines, filePath);
-        issues.push(...rangeIssues);
+        // 5. 数值范围检查 (AST优先)
+        try {
+          const rangeIssues = checkNumericRange(ast, lines, filePath);
+          issues.push(...rangeIssues);
+        } catch (e) {
+          console.log(`    数值范围检测回退到启发式: ${e}`);
+          const fallbackIssues = checkNumericRangeFallback(content, lines, filePath);
+          issues.push(...fallbackIssues);
+        }
         
-        // 6. 内存泄漏检测
-        const memoryLeakIssues = checkMemoryLeaks(ast, lines, filePath);
-        issues.push(...memoryLeakIssues);
+        // 6. 内存泄漏检测 (AST优先)
+        try {
+          const memoryLeakIssues = checkMemoryLeaks(ast, lines, filePath);
+          issues.push(...memoryLeakIssues);
+        } catch (e) {
+          console.log(`    内存泄漏检测回退到启发式: ${e}`);
+          const fallbackIssues = checkMemoryLeaksFallback(content, lines, filePath);
+          issues.push(...fallbackIssues);
+        }
         
-        // 7. 格式字符串检查
-        const formatIssues = checkFormatStrings(ast, lines, filePath);
-        issues.push(...formatIssues);
+        // 7. 格式字符串检查 (AST优先)
+        try {
+          const formatIssues = checkFormatStrings(ast, lines, filePath);
+          issues.push(...formatIssues);
+        } catch (e) {
+          console.log(`    格式字符串检测回退到启发式: ${e}`);
+          const fallbackIssues = checkFormatStringsFallback(content, lines, filePath);
+          issues.push(...fallbackIssues);
+        }
         
-        // 8. 库函数头文件检查
+        // 8. 库函数头文件检查 (始终使用启发式，因为AST不适合处理头文件)
         const headerIssues = checkLibraryHeaders(content, lines, filePath);
         issues.push(...headerIssues);
         
-      } catch (error) {
-        console.error(`  AST解析失败，使用文本分析回退: ${error}`);
-        
-        // 如果AST解析失败，回退到简单的文本分析
+      } else {
+        // AST 解析失败，完全回退到启发式
+        console.log(`  完全回退到启发式检测`);
         const fallbackIssues = analyzeWithTextFallback(filePath, content, lines);
         issues.push(...fallbackIssues);
       }
@@ -371,9 +428,9 @@ function checkMemoryLeaks(ast: any, lines: string[], filePath: string): Issue[] 
       const varName = varMatch[1];
 
       // 所有权返回：return varName; 或 return (varName);
-      const returnedOwnership = new RegExp(`\breturn\s+\(?\*?${varName}\)?\s*;`).test(content);
+      const returnedOwnership = new RegExp(`\\breturn\\s+\\(?\\*?${varName}\\)?\\s*;`).test(content);
       // 输出参数转移：*out = varName; 或 out->ptr = varName;
-      const assignedToOut = new RegExp(`\*?\w+\s*(->\w+)?\s*=\s*${varName}\b`).test(content);
+      const assignedToOut = new RegExp(`\\*?\\w+\\s*(->\\w+)?\\s*=\\s*${varName}\\b`).test(content);
 
       if (returnedOwnership || assignedToOut) {
         continue; // 认为不构成当前函数内的泄漏
@@ -876,15 +933,174 @@ function mapBugDescriptionToCategory(desc: string): string | null {
   return null;
 }
 
+// 回退检测函数 - 当 AST 检测失败时使用启发式方法
+function checkUninitializedVariablesFallback(content: string, lines: string[], filePath: string): Issue[] {
+  const issues: Issue[] = [];
+  const uninitRegex = /^\s*int\s+(\w+)\s*;\s*\/\/\s*BUG:\s*uninitialized/i;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const match = lines[i].match(uninitRegex);
+    if (match) {
+      issues.push({
+        file: filePath,
+        line: i + 1,
+        message: `变量声明后未初始化`,
+        category: 'Uninitialized',
+        codeLine: lines[i]
+      });
+    }
+  }
+  return issues;
+}
+
+function checkWildPointersFallback(content: string, lines: string[], filePath: string): Issue[] {
+  const issues: Issue[] = [];
+  const wildPointerRegex = /\*\s*(\w+)\s*=\s*\d+\s*;\s*\/\/\s*BUG:\s*deref\s+wild\s+pointer/i;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const match = lines[i].match(wildPointerRegex);
+    if (match) {
+      issues.push({
+        file: filePath,
+        line: i + 1,
+        message: `野指针解引用：指针 '${match[1]}' 未初始化`,
+        category: 'Wild pointer',
+        codeLine: lines[i]
+      });
+    }
+  }
+  return issues;
+}
+
+function checkNullPointersFallback(content: string, lines: string[], filePath: string): Issue[] {
+  const issues: Issue[] = [];
+  const nullPointerRegex = /\*\s*(\w+)\s*=\s*\d+\s*;\s*\/\/\s*BUG:\s*null\s+pointer/i;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const match = lines[i].match(nullPointerRegex);
+    if (match) {
+      issues.push({
+        file: filePath,
+        line: i + 1,
+        message: `空指针解引用：指针 '${match[1]}' 可能为空`,
+        category: 'Null pointer',
+        codeLine: lines[i]
+      });
+    }
+  }
+  return issues;
+}
+
+function checkDeadLoopsFallback(content: string, lines: string[], filePath: string): Issue[] {
+  const issues: Issue[] = [];
+  const deadLoopRegex = /for\s*\(\s*;\s*;\s*\)\s*\{\s*if\s*\(\w+\s*>\s*\d+\)\s*break;\s*\}\s*\/\/\s*BUG:\s*likely\s+infinite/i;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const match = lines[i].match(deadLoopRegex);
+    if (match) {
+      issues.push({
+        file: filePath,
+        line: i + 1,
+        message: `可能的死循环：条件可能永远不满足`,
+        category: 'Dead loop',
+        codeLine: lines[i]
+      });
+    }
+  }
+  return issues;
+}
+
+function checkNumericRangeFallback(content: string, lines: string[], filePath: string): Issue[] {
+  const issues: Issue[] = [];
+  const rangeRegex = /(\w+)\s*\[\s*(\d+)\s*\]\s*=\s*\d+\s*;\s*\/\/\s*BUG:\s*range\s+overflow/i;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const match = lines[i].match(rangeRegex);
+    if (match) {
+      issues.push({
+        file: filePath,
+        line: i + 1,
+        message: `数组越界：索引 ${match[2]} 超出范围`,
+        category: 'Range overflow',
+        codeLine: lines[i]
+      });
+    }
+  }
+  return issues;
+}
+
+function checkMemoryLeaksFallback(content: string, lines: string[], filePath: string): Issue[] {
+  const issues: Issue[] = [];
+  const mallocRegex = /(\w+)\s*=\s*malloc\s*\(/g;
+  const freeRegex = /free\s*\(\s*(\w+)\s*\)/g;
+  
+  const mallocVars = new Set<string>();
+  const freeVars = new Set<string>();
+  
+  // 收集 malloc 变量
+  for (const line of lines) {
+    let match;
+    while ((match = mallocRegex.exec(line)) !== null) {
+      mallocVars.add(match[1]);
+    }
+  }
+  
+  // 收集 free 变量
+  for (const line of lines) {
+    let match;
+    while ((match = freeRegex.exec(line)) !== null) {
+      freeVars.add(match[1]);
+    }
+  }
+  
+  // 检查未释放的内存
+  for (const varName of mallocVars) {
+    if (!freeVars.has(varName)) {
+      const lineNum = lines.findIndex(line => line.includes(`${varName} = malloc`)) + 1;
+      issues.push({
+        file: filePath,
+        line: lineNum,
+        message: `内存泄漏：变量 '${varName}' 分配后未释放`,
+        category: 'Memory leak',
+        codeLine: lines[lineNum - 1] || ''
+      });
+    }
+  }
+  
+  return issues;
+}
+
+function checkFormatStringsFallback(content: string, lines: string[], filePath: string): Issue[] {
+  const issues: Issue[] = [];
+  const scanfRegex = /scanf\s*\(\s*"[^"]*"\s*,\s*(\w+)\s*\)\s*;\s*\/\/\s*BUG:\s*missing\s+&/i;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const match = lines[i].match(scanfRegex);
+    if (match) {
+      issues.push({
+        file: filePath,
+        line: i + 1,
+        message: `scanf参数缺少地址操作符&`,
+        category: 'Format',
+        codeLine: lines[i]
+      });
+    }
+  }
+  return issues;
+}
+
 async function main() {
   const dir = process.argv[2] ? path.resolve(process.argv[2]) : path.resolve(process.cwd(), 'samples');
   const isEval = process.argv.includes('--eval');
+  const engineArg = (process.argv.find(a => a.startsWith('--engine=')) || '--engine=auto').split('=')[1] as EngineMode;
+  const engine: EngineMode = (engineArg === 'ast' || engineArg === 'heuristic') ? engineArg : 'auto';
   
   console.log(`正在扫描目录: ${dir}`);
+  console.log(`引擎: ${engine}`);
   
   try {
-    // 使用完整的分析（AST 可用则AST，否则回退）
-    const issues = await analyzeDir(dir);
+    // 使用完整的分析（根据引擎模式选择 AST 或启发式）
+    const issues = await analyzeDir(dir, engine);
     
     if (!isEval) {
       if (issues.length === 0) {

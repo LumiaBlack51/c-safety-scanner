@@ -68,24 +68,219 @@ export class CASTParser {
       p.setLanguage(NativeC);
       return new CASTParser(p);
     }
-    // WASM 回退
-    const WTS = require('web-tree-sitter');
-    await WTS.init();
-    // 优先从本地 assets 读取 wasm，若不存在则尝试从 tree-sitter-c 包内的预编译资源（若提供）
-    const path = require('path');
-    const fs = require('fs');
-    const candidates = [
-      path.join(process.cwd(), 'assets', 'grammars', 'tree-sitter-c.wasm'),
-      path.join(__dirname, '..', '..', 'assets', 'grammars', 'tree-sitter-c.wasm')
-    ];
-    let wasmPath = candidates.find((p: string) => fs.existsSync(p));
-    if (!wasmPath) {
-      throw new Error('tree-sitter-c.wasm 未找到。请将 wasm 放置于 assets/grammars/tree-sitter-c.wasm');
+    // 优先使用 WASM（web-tree-sitter）
+    try {
+      const WTS = require('web-tree-sitter');
+      await WTS.init();
+      const path = require('path');
+      const fs = require('fs');
+      const candidates = [
+        path.join(process.cwd(), 'assets', 'grammars', 'tree-sitter-c.wasm'),
+        path.join(__dirname, '..', '..', 'assets', 'grammars', 'tree-sitter-c.wasm')
+      ];
+      const wasmPath = candidates.find((p: string) => fs.existsSync(p));
+      if (wasmPath) {
+        const C_lang = await WTS.Language.load(wasmPath);
+        const parser = new WTS();
+        parser.setLanguage(C_lang);
+        return new CASTParser(parser);
+      }
+    } catch (_) {
+      // 忽略，转入 clang 回退
     }
-    const C_lang = await WTS.Language.load(wasmPath);
-    const parser = new WTS();
-    parser.setLanguage(C_lang);
-    return new CASTParser(parser);
+
+    // 最终回退：使用 clang -Xclang -ast-dump=json 生成 AST 并转换
+    const cp = require('child_process');
+    const fs = require('fs');
+    const os = require('os');
+    const path = require('path');
+
+    const clangParser = {
+      // 智能修复截断的 JSON
+      fixTruncatedJson(json: string): string | null {
+        try {
+          // 方法1: 尝试找到最后一个完整的对象
+          let braceCount = 0;
+          let lastValidPos = -1;
+          let inString = false;
+          let escapeNext = false;
+          
+          for (let i = 0; i < json.length; i++) {
+            const char = json[i];
+            if (escapeNext) {
+              escapeNext = false;
+              continue;
+            }
+            if (char === '\\') {
+              escapeNext = true;
+              continue;
+            }
+            if (char === '"' && !escapeNext) {
+              inString = !inString;
+              continue;
+            }
+            if (!inString) {
+              if (char === '{') braceCount++;
+              if (char === '}') {
+                braceCount--;
+                if (braceCount === 0) {
+                  lastValidPos = i;
+                }
+              }
+            }
+          }
+          
+          if (lastValidPos > 0) {
+            const truncated = json.substring(0, lastValidPos + 1);
+            // 验证修复后的 JSON 是否有效
+            JSON.parse(truncated);
+            return truncated;
+          }
+          
+          // 方法2: 尝试添加缺失的闭合括号
+          const openBraces = (json.match(/\{/g) || []).length;
+          const closeBraces = (json.match(/\}/g) || []).length;
+          const missingBraces = openBraces - closeBraces;
+          
+          if (missingBraces > 0) {
+            const fixed = json + '}'.repeat(missingBraces);
+            JSON.parse(fixed);
+            return fixed;
+          }
+          
+          return null;
+        } catch {
+          return null;
+        }
+      },
+      
+      parse(sourceCode: string) {
+        // 将源码写入临时文件
+        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cscan-'));
+        const tmpC = path.join(tmpDir, 'tmp.c');
+        fs.writeFileSync(tmpC, sourceCode, 'utf8');
+        
+        // 使用更健壮的 clang 命令，包含必要的头文件路径
+        const clangCmd = `clang -Xclang -ast-dump=json -fsyntax-only -I/usr/include -I/usr/local/include -I. "${tmpC}"`;
+        
+        let jsonRaw = '';
+        try {
+          // 增加超时和缓冲区大小
+          jsonRaw = cp.execSync(clangCmd, { 
+            stdio: ['ignore', 'pipe', 'pipe'],
+            timeout: 30000, // 30秒超时
+            maxBuffer: 50 * 1024 * 1024 // 50MB 缓冲区
+          }).toString();
+        } catch (e: any) {
+          // clang 可能因为头文件错误而失败，但仍可能生成部分 AST
+          jsonRaw = (e.stdout ? e.stdout.toString() : '') + '\n' + (e.stderr ? e.stderr.toString() : '');
+          if (!jsonRaw.includes('{')) {
+            console.log(`Clang AST 生成失败: ${e.message}`);
+            return { type: 'translation_unit', text: '', startPosition: { row: 0, column: 0 }, endPosition: { row: 0, column: 0 }, children: [], namedChildren: [] } as any;
+          }
+        } finally {
+          try { fs.unlinkSync(tmpC); fs.rmdirSync(tmpDir); } catch {}
+        }
+        
+        // 改进的 JSON 提取和修复逻辑
+        const jsonStart = jsonRaw.indexOf('{');
+        const jsonEnd = jsonRaw.lastIndexOf('}');
+        if (jsonStart === -1 || jsonEnd === -1) {
+          console.log('无法找到有效的 JSON 结构');
+          return { type: 'translation_unit', text: '', startPosition: { row: 0, column: 0 }, endPosition: { row: 0, column: 0 }, children: [], namedChildren: [] } as any;
+        }
+        
+        let cleanJson = jsonRaw.substring(jsonStart, jsonEnd + 1);
+        
+        // 尝试解析 JSON，如果失败则进行智能修复
+        let rootJson;
+        try {
+          rootJson = JSON.parse(cleanJson);
+          console.log(`Clang AST JSON 解析成功，长度: ${cleanJson.length}`);
+          console.log(`Clang AST 根节点类型: ${rootJson?.kind}`);
+        } catch (parseError: any) {
+          console.log(`JSON 解析失败，尝试智能修复: ${parseError.message}`);
+          
+          // 智能修复截断的 JSON
+          const fixedJson = this.fixTruncatedJson(cleanJson);
+          if (fixedJson) {
+            try {
+              rootJson = JSON.parse(fixedJson);
+              console.log(`修复后 JSON 解析成功，长度: ${fixedJson.length}`);
+              console.log(`Clang AST 根节点类型: ${rootJson?.kind}`);
+            } catch (fixError) {
+              console.log(`修复后仍然解析失败: ${fixError}`);
+              return { type: 'translation_unit', text: '', startPosition: { row: 0, column: 0 }, endPosition: { row: 0, column: 0 }, children: [], namedChildren: [] } as any;
+            }
+          } else {
+            console.log('无法修复 JSON，使用启发式回退');
+            return { type: 'translation_unit', text: '', startPosition: { row: 0, column: 0 }, endPosition: { row: 0, column: 0 }, children: [], namedChildren: [] } as any;
+          }
+        }
+
+        function toPos(node: any) {
+          const line = node?.loc?.line ?? 1;
+          const col = node?.loc?.col ?? 1;
+          return { row: Math.max(0, line - 1), column: Math.max(0, col - 1) };
+        }
+
+        function convert(node: any, parent?: any): any {
+          if (!node || typeof node !== 'object') return null;
+          
+          // 映射 clang 节点类型到 tree-sitter 兼容类型
+          const typeMap: Record<string, string> = {
+            'TranslationUnitDecl': 'translation_unit',
+            'FunctionDecl': 'function_definition',
+            'VarDecl': 'declaration',
+            'DeclStmt': 'declaration',
+            'CallExpr': 'call_expression',
+            'DeclRefExpr': 'identifier',
+            'StringLiteral': 'string_literal',
+            'IntegerLiteral': 'number_literal',
+            'ForStmt': 'for_statement',
+            'WhileStmt': 'while_statement',
+            'IfStmt': 'if_statement',
+            'BreakStmt': 'break_statement',
+            'ReturnStmt': 'return_statement',
+            'BinaryOperator': 'binary_expression',
+            'UnaryOperator': 'pointer_expression',
+            'CompoundStmt': 'compound_statement',
+            'ParmVarDecl': 'parameter_declaration',
+            'ImplicitCastExpr': 'cast_expression',
+            'PreprocessorDirective': 'preproc_include'
+          };
+          
+          const ast: any = {
+            type: typeMap[node?.kind] || node?.kind || 'unknown',
+            text: node?.name || node?.value || '',
+            startPosition: toPos(node),
+            endPosition: toPos(node?.range?.end ?? node),
+            children: [],
+            namedChildren: [],
+            parent,
+          };
+          
+          const inner = Array.isArray(node?.inner) ? node.inner : [];
+          for (const ch of inner) {
+            if (ch && typeof ch === 'object' && ch.kind) {
+              const c = convert(ch, ast);
+              if (c) {
+                ast.children.push(c);
+                ast.namedChildren.push(c);
+              }
+            }
+          }
+          return ast;
+        }
+
+        return convert(rootJson);
+      }
+    };
+
+    const parser = new CASTParser(clangParser);
+    // 为 clang 解析器添加必要的方法
+    parser.parse = clangParser.parse;
+    return parser;
   }
 
   /**
@@ -296,6 +491,7 @@ export class CASTParser {
   private traverseNode(node: ASTNode, callback: (node: ASTNode) => void): void {
     callback(node);
     for (const child of node.namedChildren) {
+      if (!child || typeof (child as any).type !== 'string') continue;
       this.traverseNode(child, callback);
     }
   }

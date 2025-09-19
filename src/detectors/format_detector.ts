@@ -46,7 +46,8 @@ export class FormatDetector extends BaseDetector {
         const format = printfMatch[1];
         const args = printfMatch[2] || '';
         
-        const formatSpecifiers = format.match(/%[sdioxXeEfFgGaAcpn%]/g) || [];
+        // 改进的格式说明符匹配，支持长度修饰符
+        const formatSpecifiers = format.match(/%[lh]?[sdioxXeEfFgGaAcpn%]/g) || [];
         const argCount = args.split(',').filter(arg => arg.trim()).length;
         
         if (formatSpecifiers.length !== argCount) {
@@ -77,7 +78,7 @@ export class FormatDetector extends BaseDetector {
         const format = sprintfMatch[1];
         const args = sprintfMatch[2] || '';
         
-        const formatSpecifiers = format.match(/%[sdioxXeEfFgGaAcpn%]/g) || [];
+        const formatSpecifiers = format.match(/%[lh]?[sdioxXeEfFgGaAcpn%]/g) || [];
         const argCount = args.split(',').filter(arg => arg.trim()).length;
         
         if (formatSpecifiers.length !== argCount) {
@@ -97,7 +98,7 @@ export class FormatDetector extends BaseDetector {
         const format = fprintfMatch[1];
         const args = fprintfMatch[2] || '';
         
-        const formatSpecifiers = format.match(/%[sdioxXeEfFgGaAcpn%]/g) || [];
+        const formatSpecifiers = format.match(/%[lh]?[sdioxXeEfFgGaAcpn%]/g) || [];
         const argCount = args.split(',').filter(arg => arg.trim()).length;
         
         if (formatSpecifiers.length !== argCount) {

@@ -237,22 +237,126 @@ export class CASTParser {
             'DeclRefExpr': 'identifier',
             'StringLiteral': 'string_literal',
             'IntegerLiteral': 'number_literal',
+            'FloatingLiteral': 'number_literal',
+            'CharacterLiteral': 'char_literal',
             'ForStmt': 'for_statement',
             'WhileStmt': 'while_statement',
+            'DoStmt': 'do_statement',
             'IfStmt': 'if_statement',
             'BreakStmt': 'break_statement',
+            'ContinueStmt': 'continue_statement',
             'ReturnStmt': 'return_statement',
             'BinaryOperator': 'binary_expression',
-            'UnaryOperator': 'pointer_expression',
+            'UnaryOperator': 'unary_expression',
             'CompoundStmt': 'compound_statement',
             'ParmVarDecl': 'parameter_declaration',
             'ImplicitCastExpr': 'cast_expression',
-            'PreprocessorDirective': 'preproc_include'
+            'CStyleCastExpr': 'cast_expression',
+            'PreprocessorDirective': 'preproc_include',
+            'MemberExpr': 'field_expression',
+            'ArraySubscriptExpr': 'subscript_expression',
+            'InitListExpr': 'initializer_list',
+            'InitDeclarator': 'init_declarator',
+            'RecordDecl': 'struct_specifier',
+            'TypedefDecl': 'type_definition',
+            'EnumDecl': 'enum_specifier',
+            'FieldDecl': 'field_declaration',
+            'ParenExpr': 'parenthesized_expression',
+            'ConditionalOperator': 'conditional_expression',
+            'CompoundAssignOperator': 'compound_assignment',
+            'CXXNewExpr': 'new_expression',
+            'CXXDeleteExpr': 'delete_expression',
+            'PointerType': 'pointer_type',
+            'ArrayType': 'array_type',
+            'BuiltinType': 'primitive_type',
+            'TypedefType': 'type_identifier',
+            'RecordType': 'struct_specifier',
+            'EnumType': 'enum_specifier',
+            'FunctionType': 'function_type',
+            'ParenType': 'parenthesized_type',
+            'QualType': 'qualified_type',
+            'ElaboratedType': 'elaborated_type',
+            'SubstTemplateTypeParmType': 'template_type',
+            'TemplateTypeParmType': 'template_type',
+            'CXXNullPtrLiteralExpr': 'null_literal',
+            'GNUNullExpr': 'null_literal',
+            'CXXBoolLiteralExpr': 'boolean_literal',
+            'UnaryExprOrTypeTraitExpr': 'sizeof_expression',
+            'SizeOfPackExpr': 'sizeof_expression',
+            'OffsetOfExpr': 'offsetof_expression',
+            'StmtExpr': 'statement_expression',
+            'CompoundLiteralExpr': 'compound_literal',
+            'ImplicitValueInitExpr': 'implicit_value_init',
+            'CXXConstructExpr': 'constructor_expression',
+            'CXXTemporaryObjectExpr': 'temporary_object',
+            'CXXBindTemporaryExpr': 'bind_temporary',
+            'MaterializeTemporaryExpr': 'materialize_temporary',
+            'CXXThisExpr': 'this_expression',
+            'CXXThrowExpr': 'throw_expression',
+            'CXXNoexceptExpr': 'noexcept_expression',
+            'CXXDefaultArgExpr': 'default_argument',
+            'CXXDefaultInitExpr': 'default_initializer',
+            'CXXScalarValueInitExpr': 'scalar_value_init',
+            'CXXStdInitializerListExpr': 'std_initializer_list',
+            'CXXPseudoDestructorExpr': 'pseudo_destructor',
+            'CXXMemberCallExpr': 'member_call_expression',
+            'CXXOperatorCallExpr': 'operator_call_expression',
+            'UserDefinedLiteral': 'user_defined_literal',
+            'CXXFunctionalCastExpr': 'functional_cast',
+            'CXXStaticCastExpr': 'static_cast_expression',
+            'CXXDynamicCastExpr': 'dynamic_cast_expression',
+            'CXXReinterpretCastExpr': 'reinterpret_cast_expression',
+            'CXXConstCastExpr': 'const_cast_expression',
+            'CXXAddrspaceCastExpr': 'addrspace_cast_expression',
+            'CXXUnresolvedConstructExpr': 'unresolved_construct',
+            'CXXDependentScopeMemberExpr': 'dependent_scope_member',
+            'CXXUnresolvedMemberExpr': 'unresolved_member',
+            'OverloadExpr': 'overload_expression',
+            'UnresolvedLookupExpr': 'unresolved_lookup',
+            'UnresolvedMemberExpr': 'unresolved_member',
+            'TypeTraitExpr': 'type_trait_expression',
+            'PackExpansionExpr': 'pack_expansion',
+            'SubstNonTypeTemplateParmExpr': 'subst_non_type_template',
+            'SubstNonTypeTemplateParmPackExpr': 'subst_non_type_template_pack',
+            'FunctionParmPackExpr': 'function_parameter_pack',
+            'CXXFoldExpr': 'fold_expression',
+            'CoroutineSuspendExpr': 'coroutine_suspend',
+            'CoawaitExpr': 'coawait_expression',
+            'CoyieldExpr': 'coyield_expression',
+            'DependentScopeDeclRefExpr': 'dependent_scope_decl_ref',
+            'CXXTypeidExpr': 'typeid_expression',
+            'CXXUuidofExpr': 'uuidof_expression'
           };
+          
+          // 获取节点的文本内容
+          let text = '';
+          if (node?.name) {
+            text = node.name;
+          } else if (node?.value) {
+            text = node.value;
+          } else if (node?.kind === 'DeclRefExpr' && node?.name) {
+            text = node.name;
+          } else if (node?.kind === 'VarDecl' && node?.name) {
+            text = node.name;
+          } else if (node?.kind === 'CallExpr' && node?.name) {
+            text = node.name;
+          } else if (node?.kind === 'StringLiteral' && node?.value) {
+            text = node.value;
+          } else if (node?.kind === 'IntegerLiteral' && node?.value) {
+            text = node.value;
+          } else if (node?.kind === 'FloatingLiteral' && node?.value) {
+            text = node.value;
+          } else if (node?.kind === 'CharacterLiteral' && node?.value) {
+            text = node.value;
+          } else if (node?.kind === 'UnaryOperator' && node?.opcode) {
+            text = node.opcode;
+          } else if (node?.kind === 'BinaryOperator' && node?.opcode) {
+            text = node.opcode;
+          }
           
           const ast: any = {
             type: typeMap[node?.kind] || node?.kind || 'unknown',
-            text: node?.name || node?.value || '',
+            text: text,
             startPosition: toPos(node),
             endPosition: toPos(node?.range?.end ?? node),
             children: [],
@@ -260,6 +364,7 @@ export class CASTParser {
             parent,
           };
           
+          // 处理 clang AST 的子节点
           const inner = Array.isArray(node?.inner) ? node.inner : [];
           for (const ch of inner) {
             if (ch && typeof ch === 'object' && ch.kind) {
@@ -270,6 +375,29 @@ export class CASTParser {
               }
             }
           }
+          
+          // 特殊处理 VarDecl 节点，确保其子节点被正确识别
+          if (node?.kind === 'VarDecl') {
+            // 查找类型信息
+            if (node?.type) {
+              const typeName = node.type?.qualType || node.type?.desugaredQualType || 'int';
+              const typeNode = convert({ kind: 'BuiltinType', name: typeName }, ast);
+              if (typeNode) {
+                ast.children.push(typeNode);
+                ast.namedChildren.push(typeNode);
+              }
+            }
+            
+            // 查找变量名
+            if (node?.name) {
+              const nameNode = convert({ kind: 'DeclRefExpr', name: node.name }, ast);
+              if (nameNode) {
+                ast.children.push(nameNode);
+                ast.namedChildren.push(nameNode);
+              }
+            }
+          }
+          
           return ast;
         }
 
@@ -306,15 +434,24 @@ export class CASTParser {
     };
 
     // 转换子节点
+    if (node.children) {
     for (const child of node.children) {
       const childNode = this.convertNode(child, astNode);
       astNode.children.push(childNode);
+      }
     }
 
     // 转换命名子节点
+    if (node.namedChildren) {
     for (const namedChild of node.namedChildren) {
       const childNode = this.convertNode(namedChild, astNode);
       astNode.namedChildren.push(childNode);
+      }
+    }
+
+    // 如果 namedChildren 为空但有 children，将所有 children 也加入 namedChildren
+    if (astNode.namedChildren.length === 0 && astNode.children.length > 0) {
+      astNode.namedChildren = [...astNode.children];
     }
 
     return astNode;
@@ -326,17 +463,20 @@ export class CASTParser {
   extractVariableDeclarations(root: ASTNode, sourceLines: string[]): VariableDeclaration[] {
     const declarations: VariableDeclaration[] = [];
     const currentScope = this.getCurrentScope(root);
+    const nodeTypes = new Set<string>();
 
     this.traverseNode(root, (node) => {
-      if (node.type === 'declaration') {
+      nodeTypes.add(node.type);
+      if (node.type === 'declaration' || node.type === 'VarDecl' || node.type === 'DeclStmt') {
         const vars = this.parseDeclaration(node, currentScope, sourceLines);
         declarations.push(...vars);
-      } else if (node.type === 'parameter_declaration') {
+      } else if (node.type === 'parameter_declaration' || node.type === 'ParmVarDecl') {
         const vars = this.parseParameterDeclaration(node, currentScope);
         declarations.push(...vars);
       }
     });
 
+    console.log(`    Node types found in AST: ${Array.from(nodeTypes).join(', ')}`);
     return declarations;
   }
 
@@ -381,16 +521,27 @@ export class CASTParser {
    */
   findVariableUsages(root: ASTNode, variableName: string): { row: number; column: number }[] {
     const usages: { row: number; column: number }[] = [];
+    let identifierCount = 0;
 
     this.traverseNode(root, (node) => {
-      if (node.type === 'identifier' && node.text === variableName) {
+      if (node.type === 'identifier' || node.type === 'DeclRefExpr') {
+        identifierCount++;
+        console.log(`    Found identifier '${node.text}' at line ${node.startPosition.row + 1}, type: ${node.type}`);
+      }
+      
+      // 检查多种可能的节点类型
+      if ((node.type === 'identifier' || node.type === 'DeclRefExpr' || node.type === 'unknown') && 
+          node.text === variableName) {
+        console.log(`    Found identifier '${variableName}' at line ${node.startPosition.row + 1}, type: ${node.type}, isDeclaration: ${this.isDeclaration(node)}`);
         // 确保这是一个变量引用而不是声明
         if (!this.isDeclaration(node)) {
+          console.log(`    Found usage of '${variableName}' at line ${node.startPosition.row + 1}, type: ${node.type}`);
           usages.push(node.startPosition);
         }
       }
     });
 
+    console.log(`    Total identifiers found: ${identifierCount}`);
     return usages;
   }
 
@@ -401,24 +552,30 @@ export class CASTParser {
     const dereferences: { row: number; column: number }[] = [];
 
     this.traverseNode(root, (node) => {
-      // 查找 *variable
-      if (node.type === 'pointer_expression') {
-        const argument = node.namedChildren[0];
-        if (argument && argument.type === 'identifier' && argument.text === variableName) {
+      // 查找 *variable - 检查unary_expression类型
+      if (node.type === 'unary_expression' || node.type === 'UnaryOperator') {
+        const argument = node.namedChildren?.[0];
+        if (argument && (argument.type === 'identifier' || argument.type === 'DeclRefExpr' || argument.type === 'unknown') && 
+            argument.text === variableName) {
+          // 检查是否是解引用操作符
+          if (node.text && node.text.includes('*')) {
           dereferences.push(node.startPosition);
+          }
         }
       }
       // 查找 variable->field
-      else if (node.type === 'field_expression' && node.text.includes('->')) {
-        const argument = node.namedChildren[0];
-        if (argument && argument.type === 'identifier' && argument.text === variableName) {
+      else if (node.type === 'field_expression' || node.type === 'MemberExpr') {
+        const argument = node.namedChildren?.[0];
+        if (argument && (argument.type === 'identifier' || argument.type === 'DeclRefExpr' || argument.type === 'unknown') && 
+            argument.text === variableName) {
           dereferences.push(node.startPosition);
         }
       }
       // 查找 variable[index]
-      else if (node.type === 'subscript_expression') {
-        const argument = node.namedChildren[0];
-        if (argument && argument.type === 'identifier' && argument.text === variableName) {
+      else if (node.type === 'subscript_expression' || node.type === 'ArraySubscriptExpr') {
+        const argument = node.namedChildren?.[0];
+        if (argument && (argument.type === 'identifier' || argument.type === 'DeclRefExpr' || argument.type === 'unknown') && 
+            argument.text === variableName) {
           dereferences.push(node.startPosition);
         }
       }
@@ -490,9 +647,24 @@ export class CASTParser {
    */
   private traverseNode(node: ASTNode, callback: (node: ASTNode) => void): void {
     callback(node);
+    
+    // 遍历namedChildren
+    if (node.namedChildren) {
     for (const child of node.namedChildren) {
       if (!child || typeof (child as any).type !== 'string') continue;
       this.traverseNode(child, callback);
+      }
+    }
+    
+    // 也遍历children（以防有些节点不在namedChildren中）
+    if (node.children) {
+      for (const child of node.children) {
+        if (!child || typeof (child as any).type !== 'string') continue;
+        // 避免重复遍历已经在namedChildren中的节点
+        if (!node.namedChildren || !node.namedChildren.includes(child)) {
+          this.traverseNode(child, callback);
+        }
+      }
     }
   }
 
@@ -507,13 +679,25 @@ export class CASTParser {
                          this.findChildByType(node, 'type_identifier') ||
                          this.findChildByType(node, 'struct_specifier');
     
-    if (!typeSpecifier) return declarations;
+    if (!typeSpecifier) {
+      return declarations;
+    }
 
     const baseType = typeSpecifier.text;
 
     // 查找声明器
-    const declarators = this.findChildrenByType(node, 'init_declarator') ||
-                       this.findChildrenByType(node, 'declarator');
+    let declarators = this.findChildrenByType(node, 'init_declarator') ||
+                      this.findChildrenByType(node, 'declarator') ||
+                      this.findChildrenByType(node, 'identifier');
+
+    // 如果没有找到声明器，尝试从所有子节点中查找
+    if (declarators.length === 0) {
+      declarators = node.namedChildren.filter(child => 
+        child.type === 'identifier' || 
+        child.type === 'declarator' || 
+        child.type === 'init_declarator'
+      );
+    }
 
     for (const declarator of declarators) {
       const varInfo = this.parseDeclarator(declarator, baseType, scope, sourceLines);
@@ -567,6 +751,20 @@ export class CASTParser {
       }
     } else if (declarator.type === 'identifier') {
       name = declarator.text;
+      // 检查是否是指针类型（通过父节点的类型信息）
+      if (declarator.parent && declarator.parent.type === 'declaration') {
+        // 检查父节点是否有指针类型信息
+        const parentText = declarator.parent.text || '';
+        isPointer = parentText.includes('*');
+        
+        // 也检查类型说明符是否包含指针信息
+        const typeSpecifier = declarator.parent.namedChildren.find(child => 
+          child.type === 'primitive_type' || child.type === 'type_identifier'
+        );
+        if (typeSpecifier && typeSpecifier.text.includes('*')) {
+          isPointer = true;
+        }
+      }
     } else {
       // 查找标识符
       const identifier = this.findChildByType(declarator, 'identifier');
@@ -575,7 +773,9 @@ export class CASTParser {
       }
     }
 
-    if (!name) return null;
+    if (!name) {
+      return null;
+    }
 
     return {
       name,
@@ -688,7 +888,10 @@ export class CASTParser {
 
     return parent.type === 'declaration' || 
            parent.type === 'parameter_declaration' ||
-           parent.type === 'init_declarator';
+           parent.type === 'init_declarator' ||
+           parent.type === 'VarDecl' ||
+           parent.type === 'ParmVarDecl' ||
+           parent.type === 'InitDeclarator';
   }
 
   /**

@@ -10,7 +10,7 @@ void test_function_params(int param1, int *param2, char param3) {
     
     // 测试局部变量
     int local_var;                          // 未初始化的局部变量
-    printf("local_var = %d\n", local_var);  // 应该报错：未初始化使用
+    printf("local_var = %d\n", local_var);  // BUG: uninitialized variable
 }
 
 // 测试 static 变量
@@ -19,7 +19,7 @@ void test_static_vars() {
     static bool static_flag;                // 未初始化的 static 变量
     
     static_counter++;                       // 应该不报错
-    if (static_flag) {                      // 应该报错：未初始化使用
+    if (static_flag) {                      // BUG: uninitialized variable
         printf("flag is true\n");
     }
 }

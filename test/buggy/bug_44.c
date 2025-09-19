@@ -54,10 +54,10 @@ void test_struct_pointer_declarations() {
     Student* student_ptr;
     
     // 测试未初始化使用 - 应该检测到
-    p1->x = 10;        // BUG: 解引用未初始化的结构体指针
-    p2->y = 20;        // BUG: 解引用未初始化的结构体指针
-    p3->x = 30;        // BUG: 解引用未初始化的结构体指针
-    p4->y = 40;        // BUG: 解引用未初始化的结构体指针
+    p1->x = 10;        // BUG: wild pointer dereference
+    p2->y = 20;        // BUG: wild pointer dereference
+    p3->x = 30;        // BUG: wild pointer dereference
+    p4->y = 40;        // BUG: wild pointer dereference
     
     // 测试结构体成员访问
     point1.x = 100;    // 正确：访问结构体变量成员
@@ -72,15 +72,15 @@ void test_struct_pointer_declarations() {
     
     // 测试嵌套结构体访问
     node1.data = 42;   // 正确：访问嵌套结构体成员
-    node_ptr->data = 43; // BUG: 解引用未初始化的指针
+    node_ptr->data = 43; // BUG: wild pointer dereference
     
     // 测试复杂结构体访问
     graph1.vertices = 5; // 正确：访问复杂结构体成员
-    graph_ptr->vertices = 6; // BUG: 解引用未初始化的指针
+    graph_ptr->vertices = 6; // BUG: wild pointer dereference
     
     // 测试typedef结构体访问
     student1.id = 1;   // 正确：访问typedef结构体成员
-    student_ptr->id = 2; // BUG: 解引用未初始化的指针
+    student_ptr->id = 2; // BUG: wild pointer dereference
 }
 
 // 测试结构体指针的内存分配和释放
@@ -258,8 +258,8 @@ void test_nested_structs() {
     person1.spouse = NULL;
     
     // 测试未初始化的嵌套结构体指针
-    person_ptr->age = 30; // BUG: 解引用未初始化的指针
-    addr_ptr->zip = 54321; // BUG: 解引用未初始化的指针
+    person_ptr->age = 30; // BUG: wild pointer dereference
+    addr_ptr->zip = 54321; // BUG: wild pointer dereference
     
     // 测试嵌套结构体指针
     person1.spouse = person_ptr; // 将未初始化的指针赋值给成员

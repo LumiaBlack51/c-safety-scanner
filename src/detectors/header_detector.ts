@@ -103,12 +103,155 @@ export class HeaderDetector extends BaseDetector {
     const issues: Issue[] = [];
     
     try {
-      issues.push(...this.detectLibraryHeaders(context));
+      // 优先使用AST检测
+      if (context.ast) {
+        issues.push(...await this.detectWithAST(context));
+      } else {
+        // 回退到启发式检测
+        issues.push(...this.detectWithHeuristic(context));
+      }
     } catch (error) {
       console.error('HeaderDetector检测错误:', error);
+      // 回退到启发式检测
+      issues.push(...this.detectWithHeuristic(context));
     }
     
     return issues;
+  }
+  
+  private async detectWithAST(context: DetectionContext): Promise<Issue[]> {
+    const issues: Issue[] = [];
+    
+    if (!context.ast) return issues;
+    
+    try {
+      // 提取所有include指令
+      const includes = this.extractIncludeDirectives(context.ast);
+      const functionCalls = this.extractFunctionCalls(context.ast);
+      
+      // 创建已包含的头文件集合
+      const includedHeaders = new Set<string>();
+      for (const include of includes) {
+        includedHeaders.add(include.headerName);
+      }
+      
+      // 检查函数调用是否需要头文件
+      for (const call of functionCalls) {
+        const requiredHeader = this.functionHeaders[call.name];
+        if (requiredHeader && !includedHeaders.has(requiredHeader)) {
+          issues.push({
+            file: context.filePath,
+            line: call.position.row + 1,
+            category: 'Header',
+            message: `使用${call.name}但未包含<${requiredHeader}>`,
+            codeLine: context.lines[call.position.row] || ''
+          });
+        }
+      }
+      
+      // 检查头文件拼写错误
+      for (const include of includes) {
+        const correctHeader = this.getCorrectHeaderName(include.headerName);
+        if (correctHeader && correctHeader !== include.headerName) {
+          issues.push({
+            file: context.filePath,
+            line: include.position.row + 1,
+            category: 'Header',
+            message: `头文件拼写错误：${include.headerName} 应该是 ${correctHeader}`,
+            codeLine: context.lines[include.position.row] || ''
+          });
+        }
+      }
+      
+    } catch (error) {
+      console.error('AST头文件检测错误:', error);
+    }
+    
+    return issues;
+  }
+  
+  private extractIncludeDirectives(ast: any): any[] {
+    const includes: any[] = [];
+    this.traverseAST(ast, (node) => {
+      if (node.type === 'preproc_include') {
+        const pathNode = this.findChildByType(node, 'string_literal') ||
+                        this.findChildByType(node, 'system_lib_string');
+        if (pathNode) {
+          const headerName = pathNode.text.replace(/[<>"]/g, '');
+          const isSystemHeader = pathNode.text.startsWith('<');
+          includes.push({
+            headerName,
+            isSystemHeader,
+            position: node.startPosition
+          });
+        }
+      }
+    });
+    return includes;
+  }
+  
+  private extractFunctionCalls(ast: any): any[] {
+    const calls: any[] = [];
+    this.traverseAST(ast, (node) => {
+      if (node.type === 'call_expression') {
+        const funcIdentifier = node.namedChildren?.[0];
+        if (funcIdentifier && funcIdentifier.type === 'identifier') {
+          calls.push({
+            name: funcIdentifier.text,
+            position: node.startPosition
+          });
+        }
+      }
+    });
+    return calls;
+  }
+  
+  private traverseAST(node: any, callback: (node: any) => void): void {
+    callback(node);
+    if (node.children) {
+      for (const child of node.children) {
+        this.traverseAST(child, callback);
+      }
+    }
+    if (node.namedChildren) {
+      for (const child of node.namedChildren) {
+        this.traverseAST(child, callback);
+      }
+    }
+  }
+  
+  private findChildByType(node: any, type: string): any {
+    if (node.namedChildren) {
+      for (const child of node.namedChildren) {
+        if (child.type === type) {
+          return child;
+        }
+      }
+    }
+    return null;
+  }
+  
+  private getCorrectHeaderName(headerName: string): string | null {
+    // 常见的头文件拼写错误映射
+    const corrections: Record<string, string> = {
+      'stdoi.h': 'stdio.h',
+      'stdllib.h': 'stdlib.h',
+      'stirng.h': 'string.h',
+      'mth.h': 'math.h',
+      'ctyp.h': 'ctype.h',
+      'tim.h': 'time.h',
+      'stdiox.h': 'stdio.h',
+      'stdlibx.h': 'stdlib.h',
+      'stringx.h': 'string.h',
+      'mathx.h': 'math.h',
+      'ctypex.h': 'ctype.h',
+      'timex.h': 'time.h'
+    };
+    return corrections[headerName] || null;
+  }
+  
+  private detectWithHeuristic(context: DetectionContext): Issue[] {
+    return this.detectLibraryHeaders(context);
   }
   
   private detectLibraryHeaders(context: DetectionContext): Issue[] {

@@ -1,0 +1,274 @@
+姝ｅ湪鎵弿鐩綍: C:\MUST\OneDrive - Macau University of Science and Technology\SoftwareEngineering\project\918\c-safety-scanner\test\buggy
+寮曟搸: auto
+AST parser initialized successfully
+姝ｅ湪鍒嗘瀽鏂囦欢: bug_0.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 35486
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, compound_statement, declaration, identifier, call_expression, cast_expression, string_literal, number_literal, for_statement, if_statement, binary_expression, break_statement, unary_expression, return_statement, parameter_declaration, BuiltinAttr, FormatAttr
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, compound_statement, declaration, identifier, call_expression, cast_expression, string_literal, number_literal, for_statement, if_statement, binary_expression, break_statement, unary_expression, return_statement, parameter_declaration, BuiltinAttr, FormatAttr
+姝ｅ湪鍒嗘瀽鏂囦欢: bug_44.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 14243233
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, PureAttr, if_statement, NullStmt, initializer_list, implicit_value_init, field_expression, subscript_expression, sizeof_expression, string_literal, for_statement, char_literal
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, PureAttr, if_statement, NullStmt, initializer_list, implicit_value_init, field_expression, subscript_expression, sizeof_expression, string_literal, for_statement, char_literal
+姝ｅ湪鍒嗘瀽鏂囦欢: bug_45.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 12251447
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, subscript_expression, char_literal, string_literal, sizeof_expression, if_statement, field_expression
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, subscript_expression, char_literal, string_literal, sizeof_expression, if_statement, field_expression
+姝ｅ湪鍒嗘瀽鏂囦欢: bug_46.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 13889623
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, PureAttr, if_statement, NullStmt, sizeof_expression, subscript_expression, string_literal
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, PureAttr, if_statement, NullStmt, sizeof_expression, subscript_expression, string_literal
+姝ｅ湪鍒嗘瀽鏂囦欢: bug_47.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 12040419
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, string_literal
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, string_literal
+姝ｅ湪鍒嗘瀽鏂囦欢: bug_48.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 12186128
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, for_statement, string_literal, while_statement, compound_assignment, RecoveryExpr, if_statement, break_statement
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, for_statement, string_literal, while_statement, compound_assignment, RecoveryExpr, if_statement, break_statement
+姝ｅ湪鍒嗘瀽鏂囦欢: bug_49.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 10713699
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, string_literal, if_statement, char_literal
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, string_literal, if_statement, char_literal
+姝ｅ湪鍒嗘瀽鏂囦欢: bug_50.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 10681048
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, string_literal, if_statement, char_literal
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, string_literal, if_statement, char_literal
+姝ｅ湪鍒嗘瀽鏂囦欢: bug_51.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 12032460
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, field_expression, subscript_expression, char_literal, for_statement, if_statement
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, field_expression, subscript_expression, char_literal, for_statement, if_statement
+姝ｅ湪鍒嗘瀽鏂囦欢: bug_52.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 12111628
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, string_literal, for_statement, subscript_expression, field_expression, if_statement, initializer_list, sizeof_expression
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, string_literal, for_statement, subscript_expression, field_expression, if_statement, initializer_list, sizeof_expression
+姝ｅ湪鍒嗘瀽鏂囦欢: bug_53.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 12196803
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, string_literal, for_statement, while_statement, compound_assignment, if_statement, break_statement, continue_statement
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, string_literal, for_statement, while_statement, compound_assignment, if_statement, break_statement, continue_statement
+姝ｅ湪鍒嗘瀽鏂囦欢: bug_54.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 14839518
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, PureAttr, string_literal
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, PureAttr, string_literal
+姝ｅ湪鍒嗘瀽鏂囦欢: bug_55.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 10921732
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, sizeof_expression, string_literal, char_literal, if_statement, AllocSizeAttr, PureAttr
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, sizeof_expression, string_literal, char_literal, if_statement, AllocSizeAttr, PureAttr
+姝ｅ湪鍒嗘瀽鏂囦欢: bug_56.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 12168847
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, subscript_expression, for_statement, string_literal, if_statement, field_expression, sizeof_expression, compound_assignment
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, subscript_expression, for_statement, string_literal, if_statement, field_expression, sizeof_expression, compound_assignment
+姝ｅ湪鍒嗘瀽鏂囦欢: bug_57.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 12586804
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, sizeof_expression, subscript_expression, string_literal, char_literal, if_statement, for_statement, field_expression
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, sizeof_expression, subscript_expression, string_literal, char_literal, if_statement, for_statement, field_expression
+姝ｅ湪鍒嗘瀽鏂囦欢: bug_58.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 12304605
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, string_literal, char_literal, if_statement
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, ConstAttr, string_literal, char_literal, if_statement
+姝ｅ湪鍒嗘瀽鏂囦欢: debug_null.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 10646341
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr
+姝ｅ湪鍒嗘瀽鏂囦欢: debug_struct.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 12998
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, field_declaration, function_definition, compound_statement, declaration, identifier, binary_expression, field_expression, cast_expression, number_literal, return_statement
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, field_declaration, function_definition, compound_statement, declaration, identifier, binary_expression, field_expression, cast_expression, number_literal, return_statement
+姝ｅ湪鍒嗘瀽鏂囦欢: graph.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 12011877
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, MSAllocatorAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, DeprecatedAttr, ConstAttr, compound_statement, return_statement, unary_expression, NoInlineAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, for_statement, dependent_scope_member, RecoveryExpr, while_statement, if_statement, subscript_expression, break_statement, sizeof_expression, string_literal
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, MSAllocatorAttr, RestrictAttr, AllocSizeAttr, AttributedType, parenthesized_type, FunctionProtoType, qualified_type, DeprecatedAttr, ConstAttr, compound_statement, return_statement, unary_expression, NoInlineAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, for_statement, dependent_scope_member, RecoveryExpr, while_statement, if_statement, subscript_expression, break_statement, sizeof_expression, string_literal
+姝ｅ湪鍒嗘瀽鏂囦欢: main.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 10663169
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RecoveryExpr, while_statement, string_literal, subscript_expression
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, parameter_declaration, BuiltinAttr, NoThrowAttr, declaration, identifier, MaxFieldAlignmentAttr, field_declaration, elaborated_type, type_identifier, compound_statement, return_statement, unary_expression, NoInlineAttr, DeprecatedAttr, MSAllocatorAttr, call_expression, cast_expression, parenthesized_expression, number_literal, binary_expression, conditional_expression, FormatAttr, RecoveryExpr, while_statement, string_literal, subscript_expression
+姝ｅ湪鍒嗘瀽鏂囦欢: simple_debug.c
+Clang AST JSON 瑙ｆ瀽鎴愬姛锛岄暱搴? 11299
+Clang AST 鏍硅妭鐐圭被鍨? TranslationUnitDecl
+  AST parsing successful, using hybrid detection mode
+    Starting variable detection...
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, compound_statement, declaration, identifier, binary_expression, unary_expression, cast_expression, number_literal, return_statement
+    Variable detection completed, found 0 issues
+    Node types found in AST: translation_unit, struct_specifier, TypeVisibilityAttr, type_definition, primitive_type, pointer_type, function_definition, compound_statement, declaration, identifier, binary_expression, unary_expression, cast_expression, number_literal, return_statement
+test\buggy\bug_0.c:1: [AST_WORKING] AST working properly: 2 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\bug_44.c:1: [AST_WORKING] AST working properly: 245 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\bug_45.c:36: [Format] scanf鍙傛暟缂哄皯鍦板潃鎿嶄綔绗?
+        scanf("%s", str3); // BUG: wild pointer dereference
+test\buggy\bug_45.c:45: [Format] scanf鍙傛暟缂哄皯鍦板潃鎿嶄綔绗?
+        scanf("%s", str4); // BUG: null pointer dereference
+test\buggy\bug_45.c:1: [AST_WORKING] AST working properly: 226 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\bug_46.c:1: [AST_WORKING] AST working properly: 219 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\bug_47.c:45: [Format] printf鏍煎紡瀛楃涓插弬鏁颁笉鍖归厤锛氶渶瑕?涓弬鏁帮紝鎻愪緵浜?涓?        printf("i1=%d, i2=%d, ui=%u\n", i1, i2, ui);
+test\buggy\bug_47.c:1: [AST_WORKING] AST working properly: 222 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\bug_48.c:4: [Dead loop] 妫€娴嬪埌鍙兘鐨勬寰幆
+    // 娴嬭瘯鐢ㄤ緥1: 鏄庢樉鐨勬寰幆 - for(;;)
+test\buggy\bug_48.c:7: [Dead loop] 妫€娴嬪埌鍙兘鐨勬寰幆
+        for(;;) {
+test\buggy\bug_48.c:12: [Dead loop] 妫€娴嬪埌鍙兘鐨勬寰幆
+    // 娴嬭瘯鐢ㄤ緥2: while(1) 姝诲惊鐜?
+test\buggy\bug_48.c:15: [Dead loop] 妫€娴嬪埌鍙兘鐨勬寰幆
+        while(1) {
+test\buggy\bug_48.c:81: [Dead loop] 妫€娴嬪埌鍙兘鐨勬寰幆
+    // 娴嬭瘯鐢ㄤ緥10: 鏈塺eturn鐨刦or(;;) - 搴旇涓嶆姤閿?
+test\buggy\bug_48.c:112: [Dead loop] 妫€娴嬪埌鍙兘鐨勬寰幆
+            for(;;) {
+test\buggy\bug_48.c:1: [AST_WORKING] AST working properly: 212 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\bug_49.c:1: [AST_WORKING] AST working properly: 208 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\bug_50.c:1: [AST_WORKING] AST working properly: 207 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\bug_51.c:1: [AST_WORKING] AST working properly: 211 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\bug_52.c:1: [AST_WORKING] AST working properly: 217 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\bug_53.c:6: [Dead loop] 妫€娴嬪埌鍙兘鐨勬寰幆
+        // 娴嬭瘯1: 鍩烘湰姝诲惊鐜?for(;;)
+test\buggy\bug_53.c:8: [Dead loop] 妫€娴嬪埌鍙兘鐨勬寰幆
+        for(;;) { // BUG: infinite loop
+test\buggy\bug_53.c:12: [Dead loop] 妫€娴嬪埌鍙兘鐨勬寰幆
+        // 娴嬭瘯2: while(1) 姝诲惊鐜?
+test\buggy\bug_53.c:13: [Dead loop] 妫€娴嬪埌鍙兘鐨勬寰幆
+        printf("娴嬭瘯2: while(1) 姝诲惊鐜痋n");
+test\buggy\bug_53.c:14: [Dead loop] 妫€娴嬪埌鍙兘鐨勬寰幆
+        while(1) { // BUG: infinite loop
+test\buggy\bug_53.c:1: [AST_WORKING] AST working properly: 211 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\bug_54.c:1: [AST_WORKING] AST working properly: 227 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\bug_55.c:7: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲?'ptr' 鍒嗛厤鍐呭瓨鍚庢湭閲婃斁
+        int *ptr = malloc(sizeof(int) * 10); // BUG: missing header - 闇€瑕?stdlib.h
+test\buggy\bug_55.c:1: [AST_WORKING] AST working properly: 230 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\bug_56.c:1: [AST_WORKING] AST working properly: 250 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\bug_57.c:12: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲?'str1' 鍒嗛厤鍐呭瓨鍚庢湭閲婃斁
+        char *str1 = malloc(100); // BUG: memory leak - 蹇樿閲婃斁
+test\buggy\bug_57.c:13: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲?'arr1' 鍒嗛厤鍐呭瓨鍚庢湭閲婃斁
+        double *arr1 = malloc(sizeof(double) * 20); // BUG: memory leak - 蹇樿閲婃斁
+test\buggy\bug_57.c:92: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲?'str6' 鍒嗛厤鍐呭瓨鍚庢湭閲婃斁
+        char *str6 = malloc(20);
+test\buggy\bug_57.c:113: [Memory leak] 鍐呭瓨娉勬紡锛氬彉閲?'values' 鍒嗛厤鍐呭瓨鍚庢湭閲婃斁
+            data->values = malloc(sizeof(int) * 10); // BUG: memory leak - 蹇樿閲婃斁values
+test\buggy\bug_57.c:1: [AST_WORKING] AST working properly: 220 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\bug_58.c:9: [Format] printf鏍煎紡瀛楃涓插弬鏁颁笉鍖归厤锛氶渶瑕?涓弬鏁帮紝鎻愪緵浜?涓?        printf("%d %d %d\n", a, b); // BUG: format mismatch - 鏍煎紡瀛楃涓叉湁3涓?d浣嗗彧鏈?涓弬鏁?
+test\buggy\bug_58.c:15: [Format] printf鏍煎紡瀛楃涓插弬鏁颁笉鍖归厤锛氶渶瑕?涓弬鏁帮紝鎻愪緵浜?涓?        printf("%d %f %c %s\n", c, d, e); // BUG: format mismatch - 鏍煎紡瀛楃涓叉湁%s浣嗘病鏈夊瓧绗︿覆鍙傛暟
+test\buggy\bug_58.c:20: [Format] printf鏍煎紡瀛楃涓插弬鏁颁笉鍖归厤锛氶渶瑕?涓弬鏁帮紝鎻愪緵浜?涓?        printf("%d\n", f, g); // BUG: format mismatch - 鏍煎紡瀛楃涓插彧鏈?涓?d浣嗘湁2涓弬鏁?
+test\buggy\bug_58.c:61: [Format] scanf鍙傛暟缂哄皯鍦板潃鎿嶄綔绗?
+        scanf("%d", ptr2); // BUG: format mismatch - 搴旇浣跨敤%p
+test\buggy\bug_58.c:68: [Format] fprintf鏍煎紡瀛楃涓插弬鏁颁笉鍖归厤锛氶渶瑕?涓弬鏁帮紝鎻愪緵浜?涓?            fprintf(file, "%d %f %s\n", v, w); // BUG: format mismatch - 鏍煎紡瀛楃涓叉湁%s浣嗘病鏈夊瓧绗︿覆鍙傛暟
+test\buggy\bug_58.c:85: [Format] sprintf鏍煎紡瀛楃涓插弬鏁颁笉鍖归厤锛氶渶瑕?涓弬鏁帮紝鎻愪緵浜?涓?        sprintf(buffer, "%d %f %s", z, aa); // BUG: format mismatch - 鏍煎紡瀛楃涓叉湁%s浣嗘病鏈夊瓧绗︿覆鍙傛暟
+test\buggy\bug_58.c:115: [Format] scanf鍙傛暟缂哄皯鍦板潃鎿嶄綔绗?
+        scanf("%c", str2); // BUG: format mismatch - 搴旇浣跨敤%s
+test\buggy\bug_58.c:127: [Format] printf鏍煎紡瀛楃涓插弬鏁颁笉鍖归厤锛氶渶瑕?涓弬鏁帮紝鎻愪緵浜?涓?        printf("%.2f\n", ii); // 姝ｇ‘锛氭寚瀹氫簡绮惧害
+test\buggy\bug_58.c:131: [Format] printf鏍煎紡瀛楃涓插弬鏁颁笉鍖归厤锛氶渶瑕?涓弬鏁帮紝鎻愪緵浜?涓?        printf("%5d\n", jj); // 姝ｇ‘锛氭寚瀹氫簡瀛楁瀹藉害
+test\buggy\bug_58.c:135: [Format] printf鏍煎紡瀛楃涓插弬鏁颁笉鍖归厤锛氶渶瑕?涓弬鏁帮紝鎻愪緵浜?涓?        printf("%-5d\n", kk); // 姝ｇ‘锛氭寚瀹氫簡宸﹀榻?
+test\buggy\bug_58.c:139: [Format] printf鏍煎紡瀛楃涓插弬鏁颁笉鍖归厤锛氶渶瑕?涓弬鏁帮紝鎻愪緵浜?涓?        printf("%05d\n", ll); // 姝ｇ‘锛氭寚瀹氫簡濉厖瀛楃
+test\buggy\bug_58.c:143: [Format] printf鏍煎紡瀛楃涓插弬鏁颁笉鍖归厤锛氶渶瑕?涓弬鏁帮紝鎻愪緵浜?涓?        printf("%+d\n", mm); // 姝ｇ‘锛氭寚瀹氫簡绗﹀彿鏄剧ず
+test\buggy\bug_58.c:147: [Format] printf鏍煎紡瀛楃涓插弬鏁颁笉鍖归厤锛氶渶瑕?涓弬鏁帮紝鎻愪緵浜?涓?        printf("% d\n", nn); // 姝ｇ‘锛氭寚瀹氫簡绌烘牸濉厖
+test\buggy\bug_58.c:1: [AST_WORKING] AST working properly: 249 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\debug_null.c:1: [AST_WORKING] AST working properly: 201 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\debug_struct.c:1: [AST_WORKING] AST working properly: 1 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\graph.c:28: [Dead loop] 妫€娴嬪埌鍙兘鐨勬寰幆
+        // BUG: 姝诲惊鐜?for(;;) 鏈€€鍑?
+test\buggy\graph.c:1: [AST_WORKING] AST working properly: 207 declarations, 1 function calls extracted
+    AST detection is functioning correctly
+test\buggy\main.c:12: [Dead loop] 妫€娴嬪埌鍙兘鐨勬寰幆
+        while (1) { int z = 0; z++; }
+test\buggy\main.c:13: [Format] printf鏍煎紡瀛楃涓插弬鏁颁笉鍖归厤锛氶渶瑕?涓弬鏁帮紝鎻愪緵浜?涓?        printf("%d %d %d\n", dist[0], dist[1]); // BUG: 灏戝弬鏁?
+test\buggy\main.c:1: [AST_WORKING] AST working properly: 202 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+test\buggy\simple_debug.c:1: [AST_WORKING] AST working properly: 1 declarations, 0 function calls extracted
+    AST detection is functioning correctly
+
+=== 鍩轰簬AST鐨凜浠ｇ爜瀹夊叏鎵弿鍣?===
+鏀寔鐨勬娴嬪姛鑳?
+- 鏈垵濮嬪寲鍙橀噺妫€娴?- 閲庢寚閽?绌烘寚閽堣В寮曠敤妫€娴?- 搴撳嚱鏁板ご鏂囦欢鍖呭惈妫€鏌?- 澶存枃浠舵嫾鍐欐鏌?- 姝诲惊鐜娴?- 鏁板€艰寖鍥存鏌?- 鍐呭瓨娉勬紡妫€娴?- printf/scanf 鏍煎紡妫€鏌?

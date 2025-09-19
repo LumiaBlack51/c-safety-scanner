@@ -16,7 +16,7 @@ void test_memory_leak() {
     strcpy(str1, "Hello World");
     arr1[0] = 3.14;
     
-    // 忘记释放内存 - 应该检测到内存泄漏
+    // BUG: memory leak - 忘记释放内存
     printf("ptr1[0] = %d\n", ptr1[0]);
     printf("str1 = %s\n", str1);
     printf("arr1[0] = %f\n", arr1[0]);
@@ -53,7 +53,7 @@ void test_partial_leak() {
     
     if (str3) {
         strcpy(str3, "Partial");
-        // 忘记释放str3 - 应该检测到内存泄漏
+        // BUG: memory leak - 忘记释放str3
     }
     
     if (arr3) {
@@ -72,7 +72,7 @@ void test_realloc_leak() {
         ptr4 = realloc(ptr4, sizeof(int) * 20);
         if (ptr4) {
             ptr4[10] = 400;
-            // 忘记释放realloc后的内存 - 应该检测到内存泄漏
+            // BUG: memory leak - 忘记释放realloc后的内存
         }
     }
 }
@@ -82,7 +82,7 @@ void helper_function() {
     char *temp = malloc(20);
     if (temp) {
         strcpy(temp, "Helper");
-        // 在helper函数中分配但未释放 - 应该检测到内存泄漏
+        // BUG: memory leak - 在helper函数中分配但未释放
     }
 }
 
@@ -110,7 +110,7 @@ void test_conditional_free() {
         if (ptr6[0] > 500) {
             free(ptr6); // 正确释放
         }
-        // str6在某些条件下未释放 - 应该检测到内存泄漏
+        // BUG: memory leak - str6在某些条件下未释放
     }
 }
 

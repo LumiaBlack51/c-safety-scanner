@@ -19,11 +19,11 @@ int main() {
     
     // 使用测试 - 应该不会误报
     static_counter++;                     // 使用已初始化的 static 变量
-    if (static_flag) {                    // 使用未初始化的 static 变量 - 应该报错
+    if (static_flag) {                    // BUG: uninitialized variable
         printf("flag is true\n");
     }
     
-    *static_ptr = 'a';                    // 解引用未初始化的 static 指针 - 应该报错
+    *static_ptr = 'a';                    // BUG: wild pointer dereference
     
     printf("const_val = %d\n", const_val); // 使用已初始化的 const 变量
     printf("const_str = %s\n", const_str); // 使用已初始化的 const 指针

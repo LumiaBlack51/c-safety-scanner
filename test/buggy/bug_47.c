@@ -4,27 +4,27 @@
 // 测试数值范围检查功能
 int main() {
     // 测试char类型范围溢出
-    char c1 = 128;        // BUG: 超出char范围(-128到127)
-    char c2 = -200;       // BUG: 超出char范围(-128到127)
-    unsigned char uc = 300; // BUG: 超出unsigned char范围(0到255)
+    char c1 = 128;        // BUG: range overflow
+    char c2 = -200;       // BUG: range overflow
+    unsigned char uc = 300; // BUG: range overflow
     
     // 测试short类型范围溢出
-    short s1 = 40000;     // BUG: 超出short范围(-32768到32767)
-    short s2 = -40000;    // BUG: 超出short范围(-32768到32767)
-    unsigned short us = 70000; // BUG: 超出unsigned short范围(0到65535)
+    short s1 = 40000;     // BUG: range overflow
+    short s2 = -40000;    // BUG: range overflow
+    unsigned short us = 70000; // BUG: range overflow
     
     // 测试int类型范围溢出
-    int i1 = 3000000000;  // BUG: 超出int范围(-2147483648到2147483647)
-    int i2 = -3000000000; // BUG: 超出int范围(-2147483648到2147483647)
-    unsigned int ui = 5000000000; // BUG: 超出unsigned int范围(0到4294967295)
+    int i1 = 3000000000;  // BUG: range overflow
+    int i2 = -3000000000; // BUG: range overflow
+    unsigned int ui = 5000000000; // BUG: range overflow
     
     // 测试十六进制数值
-    char c3 = 0x100;      // BUG: 0x100 = 256，超出char范围
-    int i3 = 0xFFFFFFFF;  // BUG: 0xFFFFFFFF = 4294967295，超出int范围
+    char c3 = 0x100;      // BUG: range overflow
+    int i3 = 0xFFFFFFFF;  // BUG: range overflow
     
     // 测试八进制数值
-    char c4 = 0400;       // BUG: 0400 = 256，超出char范围
-    short s3 = 0100000;   // BUG: 0100000 = 32768，超出short范围
+    char c4 = 0400;       // BUG: range overflow
+    short s3 = 0100000;   // BUG: range overflow
     
     // 测试正确的赋值（不应该报错）
     char c5 = 100;        // 正确：在char范围内

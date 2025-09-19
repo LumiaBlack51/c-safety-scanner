@@ -2,6 +2,13 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { Issue } from './types';
 import { CASTParser } from '../core/ast_parser';
+import { VariableDetector } from '../detectors/variable_detector';
+import { HeaderDetector } from '../detectors/header_detector';
+import { NumericDetector } from '../detectors/numeric_detector';
+import { ControlFlowDetector } from '../detectors/control_flow_detector';
+import { MemoryDetector } from '../detectors/memory_detector';
+import { FormatDetector } from '../detectors/format_detector';
+import { ASTUsageDetector } from '../detectors/ast_usage_detector';
 
 type EngineMode = 'auto' | 'ast' | 'heuristic';
 
@@ -18,10 +25,10 @@ async function analyzeDir(dir: string, engine: EngineMode): Promise<Issue[]> {
     if (engine !== 'heuristic') {
       parser = await CASTParser.create();
       astAvailable = true;
-      console.log('AST解析器初始化成功');
+      console.log('AST parser initialized successfully');
     }
   } catch (error) {
-    console.log('AST解析器初始化失败，使用文本分析模式');
+    console.log('AST parser initialization failed, using text analysis mode');
     astAvailable = false;
   }
   
@@ -40,92 +47,108 @@ async function analyzeDir(dir: string, engine: EngineMode): Promise<Issue[]> {
         // 尝试使用AST解析
         ast = parser.parse(content);
         astParseSuccess = true;
-        console.log(`  AST解析成功，使用混合检测模式`);
+        console.log(`  AST parsing successful, using hybrid detection mode`);
       } catch (error: any) {
-        console.error(`  AST解析失败，使用启发式回退: ${error}`);
+        console.error(`  AST parsing failed, using heuristic fallback: ${error}`);
         astParseSuccess = false;
       }
       
       if (astParseSuccess && ast) {
-        // AST 成功时，优先使用 AST 检测，但头文件检查仍用启发式
+        // AST 成功时，使用改进的检测器
         
-        // 1. 未初始化变量检测 (AST优先)
+        // 创建检测上下文
+        const context = {
+          filePath,
+          content,
+          lines,
+          ast,
+          config: {}
+        };
+        
+        // 创建所有检测器
+        const variableDetector = new VariableDetector({
+          uninitializedVariables: true,
+          wildPointers: true,
+          nullPointers: true
+        });
+        
+        const headerDetector = new HeaderDetector({
+          libraryHeaders: true
+        });
+        
+        const numericDetector = new NumericDetector({
+          numericRange: true
+        });
+        
+        const controlFlowDetector = new ControlFlowDetector({
+          deadLoops: true
+        });
+        
+        const memoryDetector = new MemoryDetector({
+          memoryLeaks: true
+        });
+        
+        const astUsageDetector = new ASTUsageDetector(parser);
+        
+        const formatDetector = new FormatDetector({
+          formatStrings: true
+        });
+        
+        // 使用检测器进行检测
         try {
-          const uninitIssues = await checkUninitializedVariables(ast, lines, filePath);
-          issues.push(...uninitIssues);
+          console.log(`    Starting variable detection...`);
+          const variableIssues = await variableDetector.detect(context);
+          console.log(`    Variable detection completed, found ${variableIssues.length} issues`);
+          issues.push(...variableIssues);
         } catch (e) {
-          console.log(`    未初始化检测回退到启发式: ${e}`);
-          const fallbackIssues = checkUninitializedVariablesFallback(content, lines, filePath);
-          issues.push(...fallbackIssues);
+          console.log(`    Variable detection error: ${e}`);
         }
         
-        // 2. 野指针检测 (AST优先)
         try {
-          const wildPointerIssues = await checkWildPointers(ast, lines, filePath);
-          issues.push(...wildPointerIssues);
+          const headerIssues = await headerDetector.detect(context);
+          issues.push(...headerIssues);
         } catch (e) {
-          console.log(`    野指针检测回退到启发式: ${e}`);
-          const fallbackIssues = checkWildPointersFallback(content, lines, filePath);
-          issues.push(...fallbackIssues);
+          console.log(`    Header detection error: ${e}`);
         }
         
-        // 3. 空指针检测 (AST优先)
         try {
-          const nullPointerIssues = await checkNullPointers(ast, lines, filePath);
-          issues.push(...nullPointerIssues);
+          const numericIssues = await numericDetector.detect(context);
+          issues.push(...numericIssues);
         } catch (e) {
-          console.log(`    空指针检测回退到启发式: ${e}`);
-          const fallbackIssues = checkNullPointersFallback(content, lines, filePath);
-          issues.push(...fallbackIssues);
+          console.log(`    Numeric detection error: ${e}`);
         }
         
-        // 4. 死循环检测 (AST优先)
         try {
-          const deadLoopIssues = checkDeadLoops(ast, lines, filePath);
-          issues.push(...deadLoopIssues);
+          const controlFlowIssues = await controlFlowDetector.detect(context);
+          issues.push(...controlFlowIssues);
         } catch (e) {
-          console.log(`    死循环检测回退到启发式: ${e}`);
-          const fallbackIssues = checkDeadLoopsFallback(content, lines, filePath);
-          issues.push(...fallbackIssues);
+          console.log(`    Control flow detection error: ${e}`);
         }
         
-        // 5. 数值范围检查 (AST优先)
         try {
-          const rangeIssues = checkNumericRange(ast, lines, filePath);
-          issues.push(...rangeIssues);
+          const memoryIssues = await memoryDetector.detect(context);
+          issues.push(...memoryIssues);
         } catch (e) {
-          console.log(`    数值范围检测回退到启发式: ${e}`);
-          const fallbackIssues = checkNumericRangeFallback(content, lines, filePath);
-          issues.push(...fallbackIssues);
+          console.log(`    Memory detection error: ${e}`);
         }
         
-        // 6. 内存泄漏检测 (AST优先)
         try {
-          const memoryLeakIssues = checkMemoryLeaks(ast, lines, filePath);
-          issues.push(...memoryLeakIssues);
-        } catch (e) {
-          console.log(`    内存泄漏检测回退到启发式: ${e}`);
-          const fallbackIssues = checkMemoryLeaksFallback(content, lines, filePath);
-          issues.push(...fallbackIssues);
-        }
-        
-        // 7. 格式字符串检查 (AST优先)
-        try {
-          const formatIssues = checkFormatStrings(ast, lines, filePath);
+          const formatIssues = await formatDetector.detect(context);
           issues.push(...formatIssues);
         } catch (e) {
-          console.log(`    格式字符串检测回退到启发式: ${e}`);
-          const fallbackIssues = checkFormatStringsFallback(content, lines, filePath);
-          issues.push(...fallbackIssues);
+          console.log(`    Format detection error: ${e}`);
         }
         
-        // 8. 库函数头文件检查 (始终使用启发式，因为AST不适合处理头文件)
-        const headerIssues = checkLibraryHeaders(content, lines, filePath);
-        issues.push(...headerIssues);
+        try {
+          const astUsageIssues = await astUsageDetector.detect(context);
+          issues.push(...astUsageIssues);
+        } catch (e) {
+          console.log(`    AST usage detection error: ${e}`);
+        }
         
       } else {
         // AST 解析失败，完全回退到启发式
-        console.log(`  完全回退到启发式检测`);
+        console.log(`  Falling back to heuristic detection`);
         const fallbackIssues = analyzeWithTextFallback(filePath, content, lines);
         issues.push(...fallbackIssues);
       }

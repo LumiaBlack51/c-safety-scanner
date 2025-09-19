@@ -8,45 +8,45 @@ int main() {
     // 正确：printf 包含了 stdio.h
     printf("Hello, World!\n");
     
-    // 错误：使用 malloc 但没有包含 stdlib.h
+    // BUG: missing header - 使用 malloc 但没有包含 stdlib.h
     int *ptr = malloc(sizeof(int) * 10);
     
-    // 错误：使用 strlen 但没有包含 string.h
+    // BUG: missing header - 使用 strlen 但没有包含 string.h
     char str[] = "test";
     int len = strlen(str);
     
-    // 错误：使用 sqrt 但没有包含 math.h
+    // BUG: missing header - 使用 sqrt 但没有包含 math.h
     double result = sqrt(16.0);
     
-    // 错误：使用内存拷贝函数但没有包含 string.h
+    // BUG: missing header - 使用内存拷贝函数但没有包含 string.h
     char dest[20];
     strcpy(dest, "hello");
     
-    // 错误：使用字符判断函数但没有包含 ctype.h
+    // BUG: missing header - 使用字符判断函数但没有包含 ctype.h
     char c = 'A';
     if (isalpha(c)) {
         printf("Is alpha\n");
     }
     
-    // 错误：使用 exit 但没有包含 stdlib.h
+    // BUG: missing header - 使用 exit 但没有包含 stdlib.h
     exit(0);
 }
 
 // 第二个函数测试更多情况
 void testMoreFunctions() {
-    // 错误：时间函数但没有包含 time.h
+    // BUG: missing header - 时间函数但没有包含 time.h
     time_t now = time(NULL);
     
-    // 错误：随机数函数但没有包含 stdlib.h
+    // BUG: missing header - 随机数函数但没有包含 stdlib.h
     int random = rand();
     srand(123);
     
-    // 错误：字符串比较但没有包含 string.h
+    // BUG: missing header - 字符串比较但没有包含 string.h
     char *s1 = "abc";
     char *s2 = "def";
     int cmp = strcmp(s1, s2);
     
-    // 错误：内存分配但没有包含 stdlib.h
+    // BUG: missing header - 内存分配但没有包含 stdlib.h
     void *mem = calloc(5, sizeof(int));
     free(mem); // 也需要 stdlib.h
 }
@@ -55,10 +55,10 @@ void testMoreFunctions() {
 void testFormatFunctions() {
     char buffer[100];
     
-    // 错误：sprintf 需要 stdio.h（这里已经包含了，所以应该不报错）
+    // sprintf 需要 stdio.h（这里已经包含了，所以应该不报错）
     sprintf(buffer, "Number: %d", 42);
     
-    // 错误：scanf 需要 stdio.h（已包含，不应报错）
+    // scanf 需要 stdio.h（已包含，不应报错）
     int num;
     scanf("%d", &num);
 }
@@ -66,10 +66,10 @@ void testFormatFunctions() {
 // 测试头文件拼写错误
 // 注意：这些 include 应该在文件顶部，但为了测试放在这里注释
 /*
-#include <stdoi.h>  // 拼写错误：应该是 stdio.h
-#include <stdllib.h> // 拼写错误：应该是 stdlib.h
-#include <stirng.h>  // 拼写错误：应该是 string.h
-#include <mth.h>     // 拼写错误：应该是 math.h
+#include <stdoi.h>  // BUG: header misspelling - 应该是 stdio.h
+#include <stdllib.h> // BUG: header misspelling - 应该是 stdlib.h
+#include <stirng.h>  // BUG: header misspelling - 应该是 string.h
+#include <mth.h>     // BUG: header misspelling - 应该是 math.h
 */
 
 // 测试自定义函数（不应该报错）

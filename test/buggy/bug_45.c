@@ -6,43 +6,43 @@
 // 函数1: 野指针解引用
 void test_wild_pointer() {
     int *ptr1; // 未初始化的指针
-    *ptr1 = 42; // BUG: 解引用野指针 - 应该报错
+    *ptr1 = 42; // BUG: wild pointer dereference
     
     char *str1; // 未初始化的指针
-    str1[0] = 'A'; // BUG: 解引用野指针 - 应该报错
+    str1[0] = 'A'; // BUG: wild pointer dereference
     
     double *arr1; // 未初始化的指针
-    arr1[0] = 3.14; // BUG: 解引用野指针 - 应该报错
+    arr1[0] = 3.14; // BUG: wild pointer dereference
 }
 
 // 函数2: 空指针解引用
 void test_null_pointer() {
     int *ptr2 = NULL; // 初始化为NULL
-    *ptr2 = 100; // BUG: 解引用空指针 - 应该报错
+    *ptr2 = 100; // BUG: null pointer dereference
     
     char *str2 = 0; // 初始化为0（等同于NULL）
-    str2[0] = 'B'; // BUG: 解引用空指针 - 应该报错
+    str2[0] = 'B'; // BUG: null pointer dereference
     
     float *arr2 = NULL;
-    arr2[0] = 2.5; // BUG: 解引用空指针 - 应该报错
+    arr2[0] = 2.5; // BUG: null pointer dereference
 }
 
 // 函数3: 野指针作为函数参数
 void test_wild_pointer_param() {
     int *ptr3; // 未初始化的指针
-    printf("%d\n", *ptr3); // BUG: 解引用野指针 - 应该报错
+    printf("%d\n", *ptr3); // BUG: wild pointer dereference
     
     char *str3; // 未初始化的指针
-    scanf("%s", str3); // BUG: 野指针作为参数 - 应该报错
+    scanf("%s", str3); // BUG: wild pointer dereference
 }
 
 // 函数4: 空指针作为函数参数
 void test_null_pointer_param() {
     int *ptr4 = NULL;
-    printf("%d\n", *ptr4); // 解引用空指针 - 当前检测器无法检测
+    printf("%d\n", *ptr4); // BUG: null pointer dereference
     
     char *str4 = 0;
-    scanf("%s", str4); // 空指针作为参数 - 当前检测器无法检测
+    scanf("%s", str4); // BUG: null pointer dereference
 }
 
 // 函数5: 正确的指针使用（不应该报错）

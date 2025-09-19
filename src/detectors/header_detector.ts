@@ -103,17 +103,10 @@ export class HeaderDetector extends BaseDetector {
     const issues: Issue[] = [];
     
     try {
-      // 优先使用AST检测
-      if (context.ast) {
-        issues.push(...await this.detectWithAST(context));
-      } else {
-        // 回退到启发式检测
-        issues.push(...this.detectWithHeuristic(context));
-      }
+      // 强制使用启发式检测，因为AST检测完全失效
+      issues.push(...this.detectWithHeuristic(context));
     } catch (error) {
       console.error('HeaderDetector检测错误:', error);
-      // 回退到启发式检测
-      issues.push(...this.detectWithHeuristic(context));
     }
     
     return issues;
@@ -245,7 +238,36 @@ export class HeaderDetector extends BaseDetector {
       'stringx.h': 'string.h',
       'mathx.h': 'math.h',
       'ctypex.h': 'ctype.h',
-      'timex.h': 'time.h'
+      'timex.h': 'time.h',
+      'stdio.h': 'stdio.h',
+      'stdlib.h': 'stdlib.h',
+      'string.h': 'string.h',
+      'math.h': 'math.h',
+      'ctype.h': 'ctype.h',
+      'time.h': 'time.h',
+      'limits.h': 'limits.h',
+      'float.h': 'float.h',
+      'errno.h': 'errno.h',
+      'assert.h': 'assert.h',
+      'signal.h': 'signal.h',
+      'setjmp.h': 'setjmp.h',
+      'stdarg.h': 'stdarg.h',
+      'stddef.h': 'stddef.h',
+      'locale.h': 'locale.h',
+      'wchar.h': 'wchar.h',
+      'wctype.h': 'wctype.h',
+      'stdbool.h': 'stdbool.h',
+      'stdint.h': 'stdint.h',
+      'inttypes.h': 'inttypes.h',
+      'complex.h': 'complex.h',
+      'tgmath.h': 'tgmath.h',
+      'fenv.h': 'fenv.h',
+      'iso646.h': 'iso646.h',
+      'stdalign.h': 'stdalign.h',
+      'stdatomic.h': 'stdatomic.h',
+      'stdnoreturn.h': 'stdnoreturn.h',
+      'threads.h': 'threads.h',
+      'uchar.h': 'uchar.h'
     };
     return corrections[headerName] || null;
   }
@@ -259,16 +281,78 @@ export class HeaderDetector extends BaseDetector {
     const content = context.content;
     const lines = context.lines;
     
-    // 去重：每个缺失的头文件仅报告一次（按头文件维度）
-    const missingHeaderOnce = new Set<string>();
+    // 提取所有include指令
+    const includedHeaders = new Set<string>();
+    const misspelledHeaders = new Set<string>();
     
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       
+      // 检测include指令
+      const includeMatch = line.match(/#include\s*[<"]([^>"]+)[>"]/);
+      if (includeMatch) {
+        const headerName = includeMatch[1];
+        includedHeaders.add(headerName);
+        
+        // 检查拼写错误
+        const correctHeader = this.getCorrectHeaderName(headerName);
+        if (correctHeader && correctHeader !== headerName) {
+          if (!misspelledHeaders.has(headerName)) {
+            misspelledHeaders.add(headerName);
+            issues.push({
+              file: context.filePath,
+              line: i + 1,
+              category: 'Header',
+              message: `头文件拼写错误：${headerName} 应该是 ${correctHeader}`,
+              codeLine: line
+            });
+          }
+        }
+      }
+    }
+    
+    // 检测缺失的头文件
+    const missingHeaderOnce = new Set<string>();
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const cleanLine = this.stripLineComments(line);
+      
+      // 更全面的函数调用检测
       for (const [func, header] of Object.entries(this.functionHeaders)) {
-        if (new RegExp(`\\b${func}\\s*\\(`).test(line)) {
-          if (!content.includes(`#include <${header}>`)) {
-            if (missingHeaderOnce.has(header)) continue;
+        // 检测各种函数调用模式
+        const funcPatterns = [
+          new RegExp(`\\b${func}\\s*\\(`),  // func(
+          new RegExp(`\\b${func}\\s*\\[`),  // func[
+          new RegExp(`\\b${func}\\s*;`),    // func;
+          new RegExp(`\\b${func}\\s*$`),    // func (行尾)
+          new RegExp(`\\b${func}\\s*=`),    // func =
+          new RegExp(`\\b${func}\\s*\\+`),  // func +
+          new RegExp(`\\b${func}\\s*-`),    // func -
+          new RegExp(`\\b${func}\\s*\\*`),  // func *
+          new RegExp(`\\b${func}\\s*/`),    // func /
+          new RegExp(`\\b${func}\\s*%`),    // func %
+          new RegExp(`\\b${func}\\s*\\+\\+`), // func++
+          new RegExp(`\\b${func}\\s*--`),    // func--
+          new RegExp(`\\+\\+\\s*${func}\\b`), // ++func
+          new RegExp(`--\\s*${func}\\b`),    // --func
+        ];
+        
+        let foundFunction = false;
+        for (const pattern of funcPatterns) {
+          if (pattern.test(cleanLine)) {
+            foundFunction = true;
+            break;
+          }
+        }
+        
+        if (foundFunction) {
+          // 检查是否包含对应的头文件
+          const hasHeader = includedHeaders.has(header) || 
+                           content.includes(`#include <${header}>`) ||
+                           content.includes(`#include "${header}"`);
+          
+          if (!hasHeader && !missingHeaderOnce.has(header)) {
             missingHeaderOnce.add(header);
             issues.push({
               file: context.filePath,
@@ -283,6 +367,11 @@ export class HeaderDetector extends BaseDetector {
     }
     
     return issues;
+  }
+  
+  private stripLineComments(s: string): string {
+    const idx = s.indexOf('//');
+    return idx >= 0 ? s.slice(0, idx) : s;
   }
   
   /**

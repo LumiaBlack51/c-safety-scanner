@@ -39,16 +39,50 @@ export class ControlFlowDetector extends BaseDetector {
     
     for (let i = 0; i < context.lines.length; i++) {
       const line = context.lines[i];
+      const cleanLine = this.stripLineComments(line);
       
-      // 检测明显的死循环模式
-      const isForInfinite = /for\s*\(\s*;\s*;\s*\)/.test(line);
-      const isWhileInfinite = /while\s*\(\s*1\s*\)/.test(line);
+      // 检测各种死循环模式
+      const loopPatterns = [
+        // for循环死循环
+        /for\s*\(\s*;\s*;\s*\)/,  // for(;;)
+        /for\s*\(\s*;\s*;\s*\)\s*{/,  // for(;;) {
+        /for\s*\(\s*;\s*;\s*\)\s*$/,  // for(;;) (行尾)
+        
+        // while循环死循环
+        /while\s*\(\s*1\s*\)/,  // while(1)
+        /while\s*\(\s*1\s*\)\s*{/,  // while(1) {
+        /while\s*\(\s*1\s*\)\s*$/,  // while(1) (行尾)
+        /while\s*\(\s*true\s*\)/,  // while(true)
+        /while\s*\(\s*true\s*\)\s*{/,  // while(true) {
+        /while\s*\(\s*true\s*\)\s*$/,  // while(true) (行尾)
+        
+        // do-while循环死循环
+        /do\s*{/,  // do {
+        /do\s*$/,  // do (行尾)
+      ];
       
-      if (!(isForInfinite || isWhileInfinite)) continue;
+      let foundLoop = false;
+      let loopType = '';
       
-      // 如果循环体中存在 break; 则不报告
-      const hasBreak = this.loopBodyHasBreak(context.lines, i);
-      if (hasBreak) continue;
+      for (const pattern of loopPatterns) {
+        if (pattern.test(cleanLine)) {
+          foundLoop = true;
+          if (pattern.source.includes('for')) {
+            loopType = 'for';
+          } else if (pattern.source.includes('while')) {
+            loopType = 'while';
+          } else if (pattern.source.includes('do')) {
+            loopType = 'do-while';
+          }
+          break;
+        }
+      }
+      
+      if (!foundLoop) continue;
+      
+      // 检查循环体中是否有退出条件
+      const hasExitCondition = this.loopBodyHasExitCondition(context.lines, i, loopType);
+      if (hasExitCondition) continue;
       
       issues.push({
         file: context.filePath,
@@ -62,8 +96,7 @@ export class ControlFlowDetector extends BaseDetector {
     return issues;
   }
   
-  private loopBodyHasBreak(lines: string[], loopStartIndex: number): boolean {
-    const startLine = lines[loopStartIndex];
+  private loopBodyHasExitCondition(lines: string[], loopStartIndex: number, loopType: string): boolean {
     let i = loopStartIndex;
     let braceDepth = 0;
     let started = false;
@@ -71,33 +104,54 @@ export class ControlFlowDetector extends BaseDetector {
     // 扫描最多200行作为上限，避免极端文件
     const LIMIT = Math.min(lines.length, loopStartIndex + 200);
     
+    // 退出条件模式
+    const exitPatterns = [
+      /\bbreak\s*;/,  // break;
+      /\breturn\b/,   // return
+      /\bexit\s*\(/,  // exit(
+      /\bgoto\s+\w+/, // goto label
+      /\bcontinue\s*;/, // continue;
+    ];
+    
     // 如果当前行或后续行出现 '{' 则进入块扫描模式；否则尝试一行语句模式
     for (; i < LIMIT; i++) {
       const line = this.stripLineComments(lines[i]);
+      
       if (!started) {
         if (line.includes('{')) {
           started = true;
           braceDepth += this.countChar(line, '{');
           braceDepth -= this.countChar(line, '}');
-          if (/(\bbreak\s*;|\breturn\b|\bexit\s*\(|\bgoto\s+\w+)/.test(line)) return true;
+          
+          // 检查当前行是否有退出条件
+          for (const pattern of exitPatterns) {
+            if (pattern.test(line)) return true;
+          }
+          
           if (braceDepth === 0) break; // 单行块
         } else if (i === loopStartIndex) {
           // 可能是无花括号的单语句循环体，检查下一行及之后连续非空行直至分号结束
           const nextIdx = i + 1;
           if (nextIdx < lines.length) {
             const nextLine = this.stripLineComments(lines[nextIdx]);
-            if (/(\bbreak\s*;|\breturn\b|\bexit\s*\(|\bgoto\s+\w+)/.test(nextLine)) return true;
+            for (const pattern of exitPatterns) {
+              if (pattern.test(nextLine)) return true;
+            }
           }
           return false;
         }
       } else {
         // 已进入块
-        if (/(\bbreak\s*;|\breturn\b|\bexit\s*\(|\bgoto\s+\w+)/.test(line)) return true;
+        for (const pattern of exitPatterns) {
+          if (pattern.test(line)) return true;
+        }
+        
         braceDepth += this.countChar(line, '{');
         braceDepth -= this.countChar(line, '}');
         if (braceDepth <= 0) break;
       }
     }
+    
     return false;
   }
   

@@ -28,22 +28,10 @@ export class VariableDetector extends BaseDetector {
     const issues: Issue[] = [];
     
     try {
-      // 初始化AST解析器
-      if (!this.astParser) {
-        this.astParser = await CASTParser.create();
-      }
-      
-      // 使用AST进行检测
-      if (context.ast && this.astParser) {
-        issues.push(...await this.detectWithAST(context));
-      } else {
-        // 回退到启发式检测
-        issues.push(...this.detectWithHeuristic(context));
-      }
+      // 强制使用启发式检测，因为AST检测完全失效
+      issues.push(...this.detectWithHeuristic(context));
     } catch (error) {
       console.error('VariableDetector检测错误:', error);
-      // 回退到启发式检测
-      issues.push(...this.detectWithHeuristic(context));
     }
     
     return issues;
@@ -341,132 +329,149 @@ export class VariableDetector extends BaseDetector {
   private detectWithHeuristic(context: DetectionContext): Issue[] {
     const issues: Issue[] = [];
     
-    // 未初始化变量检测
+    // 未初始化变量检测 - 大幅改进
     if (this.config.uninitializedVariables) {
-      const variableDeclarations = new Map<string, number>();
+      const variableDeclarations = new Map<string, {line: number, type: string, isPointer: boolean}>();
       
       for (let i = 0; i < context.lines.length; i++) {
         const line = context.lines[i];
+        const cleanLine = this.stripLineComments(line);
         
-        // 检测各种类型的变量声明
-        const patterns = [
-          /\b(int|char|float|double|short|long|unsigned\s+\w+)\s+\w+\s*;/,
-          /\b(struct\s+\w+)\s+\w+\s*;/,
+        // 更全面的变量声明模式
+        const declarationPatterns = [
+          // 基本类型声明
+          /\b(int|char|float|double|short|long|unsigned\s+\w+)\s+(\w+)\s*;/,
+          /\b(signed\s+\w+)\s+(\w+)\s*;/,
+          // 指针声明
           /\b(\w+)\s*\*\s*(\w+)\s*;/,
-          /\b(\w+)\s+(\w+)\s*\[.*\]\s*;/
+          /\b(\w+)\s+\*\s*(\w+)\s*;/,
+          /\b(\w+)\s*\*\s+(\w+)\s*;/,
+          // 数组声明
+          /\b(\w+)\s+(\w+)\s*\[[^\]]*\]\s*;/,
+          // 结构体声明
+          /\b(struct\s+\w+)\s+(\w+)\s*;/,
+          // 函数参数声明（在函数定义中）
+          /\b(\w+)\s+(\w+)\s*\)\s*{/,
+          // 复合类型
+          /\b(const\s+\w+)\s+(\w+)\s*;/,
+          /\b(volatile\s+\w+)\s+(\w+)\s*;/,
+          /\b(register\s+\w+)\s+(\w+)\s*;/,
+          // 更多模式
+          /\b(\w+)\s+(\w+)\s*,\s*(\w+)\s*;/,  // int a, b;
+          /\b(\w+)\s*\*\s*(\w+)\s*,\s*(\w+)\s*;/,  // int *a, b;
+          /\b(\w+)\s+(\w+)\s*,\s*\*\s*(\w+)\s*;/,  // int a, *b;
+          /\b(\w+)\s*\*\s*(\w+)\s*,\s*\*\s*(\w+)\s*;/,  // int *a, *b;
+          /\b(\w+)\s+(\w+)\s*\[[^\]]*\]\s*,\s*(\w+)\s*;/,  // int a[10], b;
+          /\b(\w+)\s+(\w+)\s*\[[^\]]*\]\s*,\s*(\w+)\s*\[[^\]]*\]\s*;/,  // int a[10], b[20];
         ];
         
-        for (const pattern of patterns) {
-          const match = line.match(pattern);
-          if (match && !line.includes('=') && !line.includes('extern') && !line.includes('static')) {
-            const varName = match[match.length - 1]; // 获取变量名
-            variableDeclarations.set(varName, i);
+        for (const pattern of declarationPatterns) {
+          const match = cleanLine.match(pattern);
+          if (match && !cleanLine.includes('=') && !cleanLine.includes('extern') && !cleanLine.includes('static') && !cleanLine.includes('typedef')) {
+            const type = match[1];
+            const isPointer = cleanLine.includes('*');
+            
+            // 处理多变量声明
+            if (match.length > 3) {
+              // 多变量声明，如 int a, b; 或 int *a, *b;
+              for (let j = 2; j < match.length; j++) {
+                const varName = match[j];
+                if (varName && varName !== type) {
+                  variableDeclarations.set(varName, {line: i, type, isPointer});
+                }
+              }
+            } else {
+              // 单变量声明
+              const varName = match[match.length - 1];
+              variableDeclarations.set(varName, {line: i, type, isPointer});
+            }
           }
         }
         
-        // 检查变量使用
-        for (const [varName, declLine] of variableDeclarations) {
-          if (i > declLine) {
-            const cleanLine = this.stripLineComments(line);
+        // 检查变量使用和初始化
+        for (const [varName, info] of variableDeclarations) {
+          if (i > info.line) {
+            // 检查是否被初始化
+            const initPatterns = [
+              new RegExp(`\\b${varName}\\s*=\\s*[^;]+`),  // 直接赋值
+              new RegExp(`\\b${varName}\\s*=\\s*malloc\\s*\\(`),  // malloc赋值
+              new RegExp(`\\b${varName}\\s*=\\s*calloc\\s*\\(`),  // calloc赋值
+              new RegExp(`\\b${varName}\\s*=\\s*realloc\\s*\\(`), // realloc赋值
+              new RegExp(`\\b${varName}\\s*=\\s*&\\w+`),  // 取地址赋值
+              new RegExp(`\\b${varName}\\s*=\\s*NULL`),   // NULL赋值
+              new RegExp(`\\b${varName}\\s*=\\s*0`),     // 0赋值
+              new RegExp(`scanf\\s*\\([^)]*,\\s*&?${varName}\\b`), // scanf初始化
+              new RegExp(`fscanf\\s*\\([^)]*,\\s*&?${varName}\\b`), // fscanf初始化
+              new RegExp(`\\b${varName}\\s*=\\s*\\w+\\s*\\+`), // 指针运算赋值
+              new RegExp(`\\b${varName}\\s*=\\s*\\w+\\s*-`), // 指针运算赋值
+              new RegExp(`\\b${varName}\\s*=\\s*\\w+\\s*\\[`), // 数组赋值
+              new RegExp(`\\b${varName}\\s*=\\s*\\w+\\s*->`), // 结构体成员赋值
+              new RegExp(`\\b${varName}\\s*=\\s*\\w+\\s*\\+\\+`), // 自增赋值
+              new RegExp(`\\b${varName}\\s*=\\s*\\w+\\s*--`), // 自减赋值
+              new RegExp(`\\b${varName}\\s*=\\s*\\w+\\s*\\(`), // 函数调用赋值
+              new RegExp(`\\b${varName}\\s*=\\s*\\w+\\s*\\*`), // 乘法赋值
+              new RegExp(`\\b${varName}\\s*=\\s*\\w+\\s*/`), // 除法赋值
+              new RegExp(`\\b${varName}\\s*=\\s*\\w+\\s*%`), // 取模赋值
+            ];
             
-            // 检查是否是赋值操作（这会初始化变量）
-            if (new RegExp(`\\b${varName}\\s*=`).test(cleanLine)) {
+            let isInitialized = false;
+            for (let k = info.line + 1; k <= i; k++) {
+              const checkLine = this.stripLineComments(context.lines[k]);
+              for (const initPattern of initPatterns) {
+                if (initPattern.test(checkLine)) {
+                  isInitialized = true;
+                  break;
+                }
+              }
+              if (isInitialized) break;
+            }
+            
+            if (isInitialized) {
               variableDeclarations.delete(varName);
               continue;
             }
             
             // 检查变量使用
-            if (new RegExp(`\\b${varName}\\b`).test(cleanLine) && 
-                !cleanLine.includes('int ') && 
-                !cleanLine.includes('char ') && 
-                !cleanLine.includes('float ') && 
-                !cleanLine.includes('double ')) {
-          issues.push({
-            file: context.filePath,
-            line: i + 1,
-            category: 'Uninitialized',
-                message: `变量 '${varName}' 在初始化前被使用`,
-            codeLine: line
-          });
-              variableDeclarations.delete(varName);
-            }
-          }
-        }
-      }
-    }
-    
-    // 野指针检测
-    if (this.config.wildPointers) {
-      const pointerDeclarations = new Map<string, number>();
-      
-      for (let i = 0; i < context.lines.length; i++) {
-        const line = context.lines[i];
-        
-        // 找到各种指针声明模式
-        const pointerPatterns = [
-          /\b(\w+)\s*\*\s*(\w+)\s*;/,  // int *ptr;
-          /\b(\w+)\s+\*\s*(\w+)\s*;/,  // int * ptr;
-          /\b(\w+)\s*\*\s+(\w+)\s*;/,  // int* ptr;
-          /\b(struct\s+\w+)\s*\*\s*(\w+)\s*;/  // struct Point *p;
-        ];
-        
-        for (const pattern of pointerPatterns) {
-          const match = line.match(pattern);
-          if (match && !line.includes('=') && !line.includes('extern') && !line.includes('static')) {
-            const pointerName = match[match.length - 1];
-            pointerDeclarations.set(pointerName, i);
-          }
-        }
-        
-        // 检查解引用
-        for (const [pointerName, declLine] of pointerDeclarations) {
-          if (i > declLine) {
-            const cleanLine = this.stripLineComments(line);
-            
-            // 检查是否在声明后有初始化
-            let initialized = false;
-            for (let k = declLine + 1; k < i; k++) {
-              const mid = this.stripLineComments(context.lines[k]);
-              if (new RegExp(`\\b${pointerName}\\s*=\\s*&?\\w+`).test(mid)) { 
-                initialized = true; 
-                break; 
-              }
-              if (new RegExp(`\\b${pointerName}\\s*=\\s*malloc\\s*\\(`).test(mid)) { 
-                initialized = true; 
-                break; 
-              }
-              if (new RegExp(`\\b${pointerName}\\s*=\\s*calloc\\s*\\(`).test(mid)) { 
-                initialized = true; 
-                break; 
-              }
-              if (new RegExp(`\\b${pointerName}\\s*=\\s*realloc\\s*\\(`).test(mid)) { 
-                initialized = true; 
-                break; 
-              }
-            }
-            if (initialized) continue;
-            
-            // 检查各种解引用模式
-            const derefPatterns = [
-              new RegExp(`\\*\\s*${pointerName}\\b`),  // *ptr
-              new RegExp(`\\b${pointerName}\\s*\\[`),  // ptr[index]
-              new RegExp(`\\b${pointerName}\\s*->`),   // ptr->field
-              new RegExp(`\\b${pointerName}\\s*\\+`),  // ptr + offset
-              new RegExp(`\\b${pointerName}\\s*-`),    // ptr - offset
-              new RegExp(`\\b${pointerName}\\s*\\*`),  // ptr * value
-              new RegExp(`\\b${pointerName}\\s*/`),    // ptr / value
-              new RegExp(`\\b${pointerName}\\s*%`),    // ptr % value
+            const usagePatterns = [
+              new RegExp(`\\b${varName}\\b`),  // 基本使用
+              new RegExp(`\\*\\s*${varName}\\b`),  // 指针解引用
+              new RegExp(`\\*\\s*\\(\\s*${varName}\\s*\\)`), // *(var)
+              new RegExp(`\\b${varName}\\s*\\[`),  // 数组访问
+              new RegExp(`\\b${varName}\\s*\\[\\s*\\w+\\s*\\]`), // var[index]
+              new RegExp(`\\b${varName}\\s*\\[\\s*\\d+\\s*\\]`), // var[123]
+              new RegExp(`\\b${varName}\\s*->`),   // 结构体成员访问
+              new RegExp(`\\b${varName}\\s*\\+`),  // 指针运算
+              new RegExp(`\\b${varName}\\s*-`),    // 指针运算
+              new RegExp(`\\b${varName}\\s*\\*`),  // 乘法运算
+              new RegExp(`\\b${varName}\\s*/`),    // 除法运算
+              new RegExp(`\\b${varName}\\s*%`),    // 取模运算
+              new RegExp(`\\b${varName}\\s*\\+\\+`), // 自增
+              new RegExp(`\\b${varName}\\s*--`),    // 自减
+              new RegExp(`\\+\\+\\s*${varName}\\b`), // ++var
+              new RegExp(`--\\s*${varName}\\b`),    // --var
+              new RegExp(`\\b${varName}\\s*\\(`),  // 函数调用
+              new RegExp(`\\b${varName}\\s*;`),    // 单独使用
+              new RegExp(`\\b${varName}\\s*$`),    // 行尾使用
             ];
             
-            for (const pattern of derefPatterns) {
-              if (pattern.test(cleanLine)) {
-              issues.push({
-                file: context.filePath,
-                line: i + 1,
-                category: 'Wild pointer',
-                message: `野指针解引用：指针 '${pointerName}' 未初始化`,
+            for (const usagePattern of usagePatterns) {
+              if (usagePattern.test(cleanLine) && 
+                  !cleanLine.includes('int ') && 
+                  !cleanLine.includes('char ') && 
+                  !cleanLine.includes('float ') && 
+                  !cleanLine.includes('double ') &&
+                  !cleanLine.includes('struct ') &&
+                  !cleanLine.includes('typedef ') &&
+                  !cleanLine.includes('enum ') &&
+                  !cleanLine.includes('union ')) {
+                issues.push({
+                  file: context.filePath,
+                  line: i + 1,
+                  category: 'Uninitialized',
+                  message: `变量 '${varName}' 在初始化前被使用`,
                   codeLine: line
-              });
+                });
+                variableDeclarations.delete(varName);
                 break;
               }
             }
@@ -475,46 +480,206 @@ export class VariableDetector extends BaseDetector {
       }
     }
     
-    // 空指针检测
-    if (this.config.nullPointers) {
-      const nullPointers = new Map<string, number>();
+    // 野指针检测 - 大幅改进
+    if (this.config.wildPointers) {
+      const pointerDeclarations = new Map<string, {line: number, type: string}>();
       
       for (let i = 0; i < context.lines.length; i++) {
         const line = context.lines[i];
+        const cleanLine = this.stripLineComments(line);
         
-        // 找到NULL指针赋值
-        const nullMatch = line.match(/(\w+)\s*=\s*(NULL|0)\s*;/);
-        if (nullMatch) {
-          nullPointers.set(nullMatch[1], i);
+        // 更全面的指针声明模式
+        const pointerPatterns = [
+          /\b(\w+)\s*\*\s*(\w+)\s*;/,  // int *ptr;
+          /\b(\w+)\s+\*\s*(\w+)\s*;/,  // int * ptr;
+          /\b(\w+)\s*\*\s+(\w+)\s*;/,  // int* ptr;
+          /\b(struct\s+\w+)\s*\*\s*(\w+)\s*;/,  // struct Point *p;
+          /\b(const\s+\w+)\s*\*\s*(\w+)\s*;/,   // const int *ptr;
+          /\b(volatile\s+\w+)\s*\*\s*(\w+)\s*;/, // volatile int *ptr;
+          /\b(\w+)\s*\*\s*const\s+(\w+)\s*;/,   // int * const ptr;
+          /\b(\w+)\s*\*\s*volatile\s+(\w+)\s*;/, // int * volatile ptr;
+          /\b(\w+)\s*\*\s*(\w+)\s*\[[^\]]*\]\s*;/, // int *ptr[10];
+          /\b(\w+)\s*\(\s*\*\s*(\w+)\s*\)\s*\([^)]*\)\s*;/, // int (*ptr)(int);
+        ];
+        
+        for (const pattern of pointerPatterns) {
+          const match = cleanLine.match(pattern);
+          if (match && !cleanLine.includes('=') && !cleanLine.includes('extern') && !cleanLine.includes('static') && !cleanLine.includes('typedef')) {
+            const pointerName = match[match.length - 1];
+            const type = match[1];
+            pointerDeclarations.set(pointerName, {line: i, type});
+          }
         }
         
         // 检查解引用
-        for (const [pointerName, declLine] of nullPointers) {
-          if (i > declLine) {
-            // 检查之后是否有非空赋值
-            let becameNonNull = false;
-            for (let k = declLine + 1; k < i; k++) {
-              const mid = this.stripLineComments(context.lines[k]);
-              if (new RegExp(`\\b${pointerName}\\s*=\\s*&?\\w+`).test(mid)) { 
-                becameNonNull = true; 
-                break; 
+        for (const [pointerName, info] of pointerDeclarations) {
+          if (i > info.line) {
+            // 检查是否在声明后有初始化
+            let initialized = false;
+            for (let k = info.line + 1; k <= i; k++) {
+              const checkLine = this.stripLineComments(context.lines[k]);
+              const initPatterns = [
+                new RegExp(`\\b${pointerName}\\s*=\\s*&?\\w+`),  // 取地址赋值
+                new RegExp(`\\b${pointerName}\\s*=\\s*malloc\\s*\\(`),  // malloc赋值
+                new RegExp(`\\b${pointerName}\\s*=\\s*calloc\\s*\\(`),  // calloc赋值
+                new RegExp(`\\b${pointerName}\\s*=\\s*realloc\\s*\\(`), // realloc赋值
+                new RegExp(`\\b${pointerName}\\s*=\\s*NULL`),   // NULL赋值
+                new RegExp(`\\b${pointerName}\\s*=\\s*0`),     // 0赋值
+                new RegExp(`\\b${pointerName}\\s*=\\s*\\w+\\s*\\+`), // 指针运算赋值
+                new RegExp(`\\b${pointerName}\\s*=\\s*\\w+\\s*-`), // 指针运算赋值
+                new RegExp(`scanf\\s*\\([^)]*,\\s*${pointerName}\\b`), // scanf初始化
+                new RegExp(`fscanf\\s*\\([^)]*,\\s*${pointerName}\\b`), // fscanf初始化
+                new RegExp(`\\b${pointerName}\\s*=\\s*\\w+\\s*\\[`), // 数组赋值
+                new RegExp(`\\b${pointerName}\\s*=\\s*\\w+\\s*->`), // 结构体成员赋值
+              ];
+              
+              for (const initPattern of initPatterns) {
+                if (initPattern.test(checkLine)) {
+                  initialized = true;
+                  break;
+                }
               }
-              if (new RegExp(`\\b${pointerName}\\s*=\\s*malloc\\s*\\(`).test(mid)) { 
-                becameNonNull = true; 
-                break; 
+              if (initialized) break;
+            }
+            
+            if (initialized) {
+              pointerDeclarations.delete(pointerName);
+              continue;
+            }
+            
+            // 检查各种解引用模式
+            const derefPatterns = [
+              new RegExp(`\\*\\s*${pointerName}\\b`),  // *ptr
+              new RegExp(`\\*\\s*\\(\\s*${pointerName}\\s*\\)`), // *(ptr)
+              new RegExp(`\\b${pointerName}\\s*\\[`),  // ptr[index]
+              new RegExp(`\\b${pointerName}\\s*->`),   // ptr->field
+              new RegExp(`\\b${pointerName}\\s*\\+`),  // ptr + offset
+              new RegExp(`\\b${pointerName}\\s*-`),    // ptr - offset
+              new RegExp(`\\b${pointerName}\\s*\\*`),  // ptr * value
+              new RegExp(`\\b${pointerName}\\s*/`),    // ptr / value
+              new RegExp(`\\b${pointerName}\\s*%`),    // ptr % value
+              new RegExp(`\\b${pointerName}\\s*\\+\\+`), // ptr++
+              new RegExp(`\\b${pointerName}\\s*--`),    // ptr--
+              new RegExp(`\\+\\+\\s*${pointerName}\\b`), // ++ptr
+              new RegExp(`--\\s*${pointerName}\\b`),    // --ptr
+              new RegExp(`\\b${pointerName}\\s*\\[\\s*\\w+\\s*\\]`), // ptr[var]
+              new RegExp(`\\b${pointerName}\\s*\\[\\s*\\d+\\s*\\]`), // ptr[123]
+            ];
+            
+            for (const pattern of derefPatterns) {
+              if (pattern.test(cleanLine)) {
+                issues.push({
+                  file: context.filePath,
+                  line: i + 1,
+                  category: 'Wild pointer',
+                  message: `野指针解引用：指针 '${pointerName}' 未初始化`,
+                  codeLine: line
+                });
+                pointerDeclarations.delete(pointerName);
+                break;
               }
             }
-            if (becameNonNull) continue;
+          }
+        }
+      }
+    }
+    
+    // 空指针检测 - 大幅改进
+    if (this.config.nullPointers) {
+      const nullPointers = new Map<string, {line: number, type: string}>();
+      
+      for (let i = 0; i < context.lines.length; i++) {
+        const line = context.lines[i];
+        const cleanLine = this.stripLineComments(line);
+        
+        // 找到NULL指针赋值 - 更全面的模式
+        const nullPatterns = [
+          /(\w+)\s*=\s*(NULL|0)\s*;/,  // ptr = NULL;
+          /(\w+)\s*=\s*(NULL|0)\s*$/,  // ptr = NULL (行尾)
+          /(\w+)\s*=\s*\([^)]*\)\s*(NULL|0)\s*;/, // ptr = (type)NULL;
+          /(\w+)\s*=\s*\([^)]*\)\s*(NULL|0)\s*$/, // ptr = (type)NULL (行尾)
+          /(\w+)\s*=\s*\([^)]*\)\s*0\s*;/, // ptr = (type)0;
+          /(\w+)\s*=\s*\([^)]*\)\s*0\s*$/, // ptr = (type)0 (行尾)
+        ];
+        
+        for (const pattern of nullPatterns) {
+          const match = cleanLine.match(pattern);
+          if (match) {
+            const pointerName = match[1];
+            // 检查是否是函数参数
+            if (!cleanLine.includes('(') || cleanLine.includes('=')) {
+              nullPointers.set(pointerName, {line: i, type: 'null'});
+            }
+          }
+        }
+        
+        // 检查解引用
+        for (const [pointerName, info] of nullPointers) {
+          if (i > info.line) {
+            // 检查之后是否有非空赋值
+            let becameNonNull = false;
+            for (let k = info.line + 1; k <= i; k++) {
+              const checkLine = this.stripLineComments(context.lines[k]);
+              const nonNullPatterns = [
+                new RegExp(`\\b${pointerName}\\s*=\\s*&?\\w+`),  // 取地址赋值
+                new RegExp(`\\b${pointerName}\\s*=\\s*malloc\\s*\\(`),  // malloc赋值
+                new RegExp(`\\b${pointerName}\\s*=\\s*calloc\\s*\\(`),  // calloc赋值
+                new RegExp(`\\b${pointerName}\\s*=\\s*realloc\\s*\\(`), // realloc赋值
+                new RegExp(`\\b${pointerName}\\s*=\\s*\\w+\\s*\\+`), // 指针运算赋值
+                new RegExp(`\\b${pointerName}\\s*=\\s*\\w+\\s*-`), // 指针运算赋值
+                new RegExp(`scanf\\s*\\([^)]*,\\s*${pointerName}\\b`), // scanf初始化
+                new RegExp(`fscanf\\s*\\([^)]*,\\s*${pointerName}\\b`), // fscanf初始化
+                new RegExp(`\\b${pointerName}\\s*=\\s*\\w+\\s*\\[`), // 数组赋值
+                new RegExp(`\\b${pointerName}\\s*=\\s*\\w+\\s*->`), // 结构体成员赋值
+                new RegExp(`\\b${pointerName}\\s*=\\s*\\w+\\s*\\+\\+`), // 自增赋值
+                new RegExp(`\\b${pointerName}\\s*=\\s*\\w+\\s*--`), // 自减赋值
+              ];
+              
+              for (const nonNullPattern of nonNullPatterns) {
+                if (nonNullPattern.test(checkLine)) {
+                  becameNonNull = true;
+                  break;
+                }
+              }
+              if (becameNonNull) break;
+            }
             
-            const seg = this.stripLineComments(context.lines[i]);
-            if (seg.includes(`*${pointerName}`)) {
-              issues.push({
-                file: context.filePath,
-                line: i + 1,
-                category: 'Null pointer',
-                message: `空指针解引用：指针 '${pointerName}' 为 NULL`,
-                codeLine: context.lines[i]
-              });
+            if (becameNonNull) {
+              nullPointers.delete(pointerName);
+              continue;
+            }
+            
+            // 检查各种解引用模式
+            const derefPatterns = [
+              new RegExp(`\\*\\s*${pointerName}\\b`),  // *ptr
+              new RegExp(`\\*\\s*\\(\\s*${pointerName}\\s*\\)`), // *(ptr)
+              new RegExp(`\\b${pointerName}\\s*\\[`),  // ptr[index]
+              new RegExp(`\\b${pointerName}\\s*->`),   // ptr->field
+              new RegExp(`\\b${pointerName}\\s*\\+`),  // ptr + offset
+              new RegExp(`\\b${pointerName}\\s*-`),    // ptr - offset
+              new RegExp(`\\b${pointerName}\\s*\\*`),  // ptr * value
+              new RegExp(`\\b${pointerName}\\s*/`),    // ptr / value
+              new RegExp(`\\b${pointerName}\\s*%`),    // ptr % value
+              new RegExp(`\\b${pointerName}\\s*\\+\\+`), // ptr++
+              new RegExp(`\\b${pointerName}\\s*--`),    // ptr--
+              new RegExp(`\\+\\+\\s*${pointerName}\\b`), // ++ptr
+              new RegExp(`--\\s*${pointerName}\\b`),    // --ptr
+              new RegExp(`\\b${pointerName}\\s*\\[\\s*\\w+\\s*\\]`), // ptr[var]
+              new RegExp(`\\b${pointerName}\\s*\\[\\s*\\d+\\s*\\]`), // ptr[123]
+            ];
+            
+            for (const pattern of derefPatterns) {
+              if (pattern.test(cleanLine)) {
+                issues.push({
+                  file: context.filePath,
+                  line: i + 1,
+                  category: 'Null pointer',
+                  message: `空指针解引用：指针 '${pointerName}' 为 NULL`,
+                  codeLine: line
+                });
+                nullPointers.delete(pointerName);
+                break;
+              }
             }
           }
         }

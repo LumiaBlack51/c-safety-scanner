@@ -38,14 +38,39 @@ export class MemoryDetector extends BaseDetector {
     const content = context.content;
     const lines = context.lines;
     
-    // 改进的内存泄漏检测，支持更复杂的所有权转移模式
-    const mallocMatches = content.match(/(\w+)\s*=\s*malloc\s*\(/g) || [];
+    // 更全面的内存分配函数检测
+    const allocationPatterns = [
+      /(\w+)\s*=\s*malloc\s*\(/g,
+      /(\w+)\s*=\s*calloc\s*\(/g,
+      /(\w+)\s*=\s*realloc\s*\(/g,
+      /(\w+)\s*=\s*strdup\s*\(/g,
+      /(\w+)\s*=\s*strndup\s*\(/g,
+    ];
     
-    for (const mallocMatch of mallocMatches) {
-      const varMatch = mallocMatch.match(/(\w+)\s*=/);
-      if (!varMatch) continue;
-      const varName = varMatch[1];
-      
+    const allocatedVars = new Map<string, {line: number, type: string}>();
+    
+    // 收集所有内存分配
+    for (const pattern of allocationPatterns) {
+      let match;
+      while ((match = pattern.exec(content)) !== null) {
+        const varName = match[1];
+        const allocationType = match[0].includes('malloc') ? 'malloc' :
+                             match[0].includes('calloc') ? 'calloc' :
+                             match[0].includes('realloc') ? 'realloc' :
+                             match[0].includes('strdup') ? 'strdup' : 'strndup';
+        
+        // 找到分配的行号
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].includes(match[0])) {
+            allocatedVars.set(varName, {line: i, type: allocationType});
+            break;
+          }
+        }
+      }
+    }
+    
+    // 检查每个分配的内存是否有对应的释放
+    for (const [varName, info] of allocatedVars) {
       // 检查是否存在合法的所有权转移
       if (this.hasValidOwnershipTransfer(content, varName)) {
         continue; // 认为不构成当前函数内的泄漏
@@ -53,19 +78,13 @@ export class MemoryDetector extends BaseDetector {
       
       // 检查是否有对应的free调用
       if (!this.hasMatchingFree(content, varName)) {
-        // 找到malloc出现的第一行
-        for (let i = 0; i < lines.length; i++) {
-          if (lines[i].includes(mallocMatch)) {
-            issues.push({
-              file: context.filePath,
-              line: i + 1,
-              category: 'Memory leak',
-              message: `内存泄漏：变量 '${varName}' 分配内存后未释放`,
-              codeLine: lines[i]
-            });
-            break;
-          }
-        }
+        issues.push({
+          file: context.filePath,
+          line: info.line + 1,
+          category: 'Memory leak',
+          message: `内存泄漏：变量 '${varName}' 分配内存后未释放`,
+          codeLine: lines[info.line]
+        });
       }
     }
     
@@ -136,7 +155,19 @@ export class MemoryDetector extends BaseDetector {
       }
     }
     
-    // 6. 条件赋值：if (condition) { varName = malloc(...); } else { return varName; }
+    // 6. 全局变量赋值：global_var = varName;
+    const globalPatterns = [
+      new RegExp(`\\w+\\s*=\\s*${varName}\\s*;`),
+      new RegExp(`\\w+\\s*=\\s*${varName}\\s*$`)
+    ];
+    
+    for (const pattern of globalPatterns) {
+      if (pattern.test(content)) {
+        return true;
+      }
+    }
+    
+    // 7. 条件赋值：if (condition) { varName = malloc(...); } else { return varName; }
     // 这种情况比较复杂，暂时不处理
     
     return false;
@@ -146,7 +177,9 @@ export class MemoryDetector extends BaseDetector {
     // 检查是否有对应的free调用
     const freePatterns = [
       new RegExp(`free\\s*\\(\\s*${varName}\\s*\\)`),
-      new RegExp(`free\\s*\\(\\s*&?${varName}\\s*\\)`)
+      new RegExp(`free\\s*\\(\\s*&?${varName}\\s*\\)`),
+      new RegExp(`free\\s*\\(\\s*\\([^)]*\\)\\s*${varName}\\s*\\)`), // free((type)varName)
+      new RegExp(`free\\s*\\(\\s*${varName}\\s*\\([^)]*\\)\\s*\\)`), // free(varName(...))
     ];
     
     for (const pattern of freePatterns) {

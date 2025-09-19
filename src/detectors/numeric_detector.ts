@@ -25,17 +25,10 @@ export class NumericDetector extends BaseDetector {
     const issues: Issue[] = [];
     
     try {
-      // 优先使用AST检测
-      if (context.ast) {
-        issues.push(...await this.detectWithAST(context));
-      } else {
-        // 回退到启发式检测
-        issues.push(...this.detectWithHeuristic(context));
-      }
+      // 强制使用启发式检测，因为AST检测完全失效
+      issues.push(...this.detectWithHeuristic(context));
     } catch (error) {
       console.error('NumericDetector检测错误:', error);
-      // 回退到启发式检测
-      issues.push(...this.detectWithHeuristic(context));
     }
     
     return issues;
@@ -273,6 +266,31 @@ export class NumericDetector extends BaseDetector {
         type: 'unsigned long',
         min: 0,
         max: 18446744073709551615
+      },
+      // 更多unsigned模式
+      {
+        regex: /^\s*\bunsigned\s+char\s+(\w+)\s*=\s*(\d+)\s*;?\s*$/,
+        type: 'unsigned char',
+        min: 0,
+        max: 255
+      },
+      {
+        regex: /^\s*\bunsigned\s+short\s+(\w+)\s*=\s*(\d+)\s*;?\s*$/,
+        type: 'unsigned short',
+        min: 0,
+        max: 65535
+      },
+      {
+        regex: /^\s*\bunsigned\s+int\s+(\w+)\s*=\s*(\d+)\s*;?\s*$/,
+        type: 'unsigned int',
+        min: 0,
+        max: 4294967295
+      },
+      {
+        regex: /^\s*\bunsigned\s+long\s+(\w+)\s*=\s*(\d+)\s*;?\s*$/,
+        type: 'unsigned long',
+        min: 0,
+        max: 18446744073709551615
       }
     ];
     
@@ -423,6 +441,61 @@ export class NumericDetector extends BaseDetector {
         type: 'int',
         min: -2147483648,
         max: 2147483647
+      },
+      {
+        regex: /^\s*\blong\s+(\w+)\s*=\s*(\d+)\s*;?\s*$/,
+        type: 'long',
+        min: -9223372036854775808,
+        max: 9223372036854775807
+      },
+      {
+        regex: /^\s*\bfloat\s+(\w+)\s*=\s*(\d+\.?\d*)\s*;?\s*$/,
+        type: 'float',
+        min: -3.4028235e38,
+        max: 3.4028235e38
+      },
+      {
+        regex: /^\s*\bdouble\s+(\w+)\s*=\s*(\d+\.?\d*)\s*;?\s*$/,
+        type: 'double',
+        min: -1.7976931348623157e308,
+        max: 1.7976931348623157e308
+      },
+      // 更多模式
+      {
+        regex: /^\s*\bchar\s+(\w+)\s*=\s*(\d+)\s*;?\s*$/,
+        type: 'char',
+        min: -128,
+        max: 127
+      },
+      {
+        regex: /^\s*\bshort\s+(\w+)\s*=\s*(\d+)\s*;?\s*$/,
+        type: 'short',
+        min: -32768,
+        max: 32767
+      },
+      {
+        regex: /^\s*\bint\s+(\w+)\s*=\s*(\d+)\s*;?\s*$/,
+        type: 'int',
+        min: -2147483648,
+        max: 2147483647
+      },
+      {
+        regex: /^\s*\blong\s+(\w+)\s*=\s*(\d+)\s*;?\s*$/,
+        type: 'long',
+        min: -9223372036854775808,
+        max: 9223372036854775807
+      },
+      {
+        regex: /^\s*\bfloat\s+(\w+)\s*=\s*(\d+\.?\d*)\s*;?\s*$/,
+        type: 'float',
+        min: -3.4028235e38,
+        max: 3.4028235e38
+      },
+      {
+        regex: /^\s*\bdouble\s+(\w+)\s*=\s*(\d+\.?\d*)\s*;?\s*$/,
+        type: 'double',
+        min: -1.7976931348623157e308,
+        max: 1.7976931348623157e308
       }
     ];
     

@@ -122,6 +122,7 @@ export class DetectorManager {
     
     // 并行执行所有启用的检测器
     const enabledDetectors = Array.from(this.detectors.values()).filter(d => d.isEnabled());
+    console.log(`[DEBUG] 启用的检测器: ${enabledDetectors.map(d => d.getName()).join(', ')}`);
     
     if (this.config.advanced.enableParallelDetection) {
       // 并行执行

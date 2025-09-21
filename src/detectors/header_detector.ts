@@ -225,7 +225,27 @@ export class HeaderDetector extends BaseDetector {
   }
   
   private getCorrectHeaderName(headerName: string): string | null {
-    // 常见的头文件拼写错误映射
+    // C标准库头文件白名单
+    const standardHeaders = new Set([
+      'stdio.h', 'stdlib.h', 'string.h', 'math.h', 'ctype.h', 'time.h',
+      'limits.h', 'float.h', 'errno.h', 'assert.h', 'signal.h', 'setjmp.h',
+      'stdarg.h', 'stddef.h', 'locale.h', 'wchar.h', 'wctype.h', 'stdbool.h',
+      'stdint.h', 'inttypes.h', 'complex.h', 'tgmath.h', 'fenv.h', 'iso646.h',
+      'stdalign.h', 'stdatomic.h', 'stdnoreturn.h', 'threads.h', 'uchar.h'
+    ]);
+
+    // 如果头文件在白名单中，直接返回
+    if (standardHeaders.has(headerName)) {
+      return headerName;
+    }
+
+    // 使用编辑距离算法找到最相似的标准头文件
+    const suggestions = this.findSimilarHeaders(headerName, standardHeaders);
+    if (suggestions.length > 0) {
+      return suggestions[0]; // 返回最相似的头文件
+    }
+
+    // 常见的头文件拼写错误映射（保留作为备用）
     const corrections: Record<string, string> = {
       'stdoi.h': 'stdio.h',
       'stdllib.h': 'stdlib.h',
@@ -238,38 +258,64 @@ export class HeaderDetector extends BaseDetector {
       'stringx.h': 'string.h',
       'mathx.h': 'math.h',
       'ctypex.h': 'ctype.h',
-      'timex.h': 'time.h',
-      'stdio.h': 'stdio.h',
-      'stdlib.h': 'stdlib.h',
-      'string.h': 'string.h',
-      'math.h': 'math.h',
-      'ctype.h': 'ctype.h',
-      'time.h': 'time.h',
-      'limits.h': 'limits.h',
-      'float.h': 'float.h',
-      'errno.h': 'errno.h',
-      'assert.h': 'assert.h',
-      'signal.h': 'signal.h',
-      'setjmp.h': 'setjmp.h',
-      'stdarg.h': 'stdarg.h',
-      'stddef.h': 'stddef.h',
-      'locale.h': 'locale.h',
-      'wchar.h': 'wchar.h',
-      'wctype.h': 'wctype.h',
-      'stdbool.h': 'stdbool.h',
-      'stdint.h': 'stdint.h',
-      'inttypes.h': 'inttypes.h',
-      'complex.h': 'complex.h',
-      'tgmath.h': 'tgmath.h',
-      'fenv.h': 'fenv.h',
-      'iso646.h': 'iso646.h',
-      'stdalign.h': 'stdalign.h',
-      'stdatomic.h': 'stdatomic.h',
-      'stdnoreturn.h': 'stdnoreturn.h',
-      'threads.h': 'threads.h',
-      'uchar.h': 'uchar.h'
+      'timex.h': 'time.h'
     };
+    
     return corrections[headerName] || null;
+  }
+
+  /**
+   * 使用编辑距离算法找到最相似的标准头文件
+   */
+  private findSimilarHeaders(headerName: string, standardHeaders: Set<string>): string[] {
+    const suggestions: { header: string; distance: number }[] = [];
+    
+    for (const standardHeader of standardHeaders) {
+      const distance = this.calculateEditDistance(headerName, standardHeader);
+      // 如果编辑距离小于等于2，认为是可能的拼写错误
+      if (distance <= 2) {
+        suggestions.push({ header: standardHeader, distance });
+      }
+    }
+    
+    // 按编辑距离排序，返回最相似的头文件
+    suggestions.sort((a, b) => a.distance - b.distance);
+    return suggestions.map(s => s.header);
+  }
+
+  /**
+   * 计算两个字符串之间的编辑距离（Levenshtein距离）
+   */
+  private calculateEditDistance(str1: string, str2: string): number {
+    const matrix: number[][] = [];
+    const len1 = str1.length;
+    const len2 = str2.length;
+
+    // 初始化矩阵
+    for (let i = 0; i <= len1; i++) {
+      matrix[i] = [];
+      matrix[i][0] = i;
+    }
+    for (let j = 0; j <= len2; j++) {
+      matrix[0][j] = j;
+    }
+
+    // 填充矩阵
+    for (let i = 1; i <= len1; i++) {
+      for (let j = 1; j <= len2; j++) {
+        if (str1[i - 1] === str2[j - 1]) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j] + 1,     // 删除
+            matrix[i][j - 1] + 1,     // 插入
+            matrix[i - 1][j - 1] + 1  // 替换
+          );
+        }
+      }
+    }
+
+    return matrix[len1][len2];
   }
   
   private detectWithHeuristic(context: DetectionContext): Issue[] {
@@ -294,7 +340,7 @@ export class HeaderDetector extends BaseDetector {
         const headerName = includeMatch[1];
         includedHeaders.add(headerName);
         
-        // 检查拼写错误
+        // 检查拼写错误 - 使用白名单比对
         const correctHeader = this.getCorrectHeaderName(headerName);
         if (correctHeader && correctHeader !== headerName) {
           if (!misspelledHeaders.has(headerName)) {
